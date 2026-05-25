@@ -2,6 +2,11 @@
 
 🌐 **English** · [中文](CHANGELOG.zh-CN.md)
 
+### 1.5.8
+- Results count selector in the overlay — pick 10 / 20 / 50 from the footer (also keyboard accessible).
+- Fix: ⌘K input no longer loses focus inside host pages that run their own focus traps (e.g. Quasar QDialog).
+- Overlay favicons are rendered in isolation from the host page so result icons don't pick up host styles, and fall back to safe URLs when the page's favicon isn't usable.
+
 ### 1.5.7
 - Search now uses Chrome's default search engine instead of a hardcoded Google URL.
 - Polish overlay action icons: the search action uses the same magnifier as the input, and direct-open URL actions use the target site's favicon when available.
