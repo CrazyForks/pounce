@@ -431,7 +431,8 @@ async function getSearchData() {
 
 // 无法注入 content script 的受保护 URL 前缀
 const PROTECTED_URL_PREFIXES = [
-  'chrome://', 'chrome-extension://', 'about:', 'edge://',
+  'chrome://', 'chrome-extension://', 'chrome-untrusted://',
+  'about:', 'edge://', 'devtools://', 'view-source:', 'file://',
   'https://chromewebstore.google.com',
   'https://chrome.google.com/webstore'
 ];
