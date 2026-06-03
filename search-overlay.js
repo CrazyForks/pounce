@@ -70,6 +70,8 @@
       this.historyFetchRequestId = 0;
       this.bridgeTabId = null;
       this.visibleResultIndices = [];
+      this.expandedGroups = new Set();
+      this.displayRows = [];
       this.searchPreferences = normalizeSearchPreferences({});
       this.quickPickHint = null;
       this.resultsLimitSelect = null;
@@ -853,8 +855,11 @@
         : this.allData;
 
       const limit = this.searchPreferences.resultsLimit || DEFAULT_SEARCH_PREFERENCES.resultsLimit;
+      // 浏览态(空查询)要覆盖全部打开标签 → 不截断;非标签段在 buildDisplayRows 里按 limit 截断。
+      const trimmed = String(query || '').trim();
+      const effectiveLimit = trimmed ? limit : ((merged && merged.length) || limit);
       if (window.PounceSearchUtils && typeof window.PounceSearchUtils.rankResults === 'function') {
-        this.currentResults = window.PounceSearchUtils.rankResults(merged, query, limit);
+        this.currentResults = window.PounceSearchUtils.rankResults(merged, query, effectiveLimit);
       } else {
         this.currentResults = this.getFallbackResults(query);
       }
@@ -1085,42 +1090,129 @@
       }
     }
 
+    rebuildDisplayRows(query) {
+      const grouping = window.PounceTabGrouping;
+      const nonTabLimit = this.searchPreferences.resultsLimit || DEFAULT_SEARCH_PREFERENCES.resultsLimit;
+      if (grouping && typeof grouping.buildDisplayRows === 'function') {
+        this.displayRows = grouping.buildDisplayRows(this.currentResults, {
+          query,
+          expandedGroups: this.expandedGroups,
+          nonTabLimit,
+        });
+      } else {
+        // 降级:不分组,平铺。
+        this.displayRows = (this.currentResults || []).map((item) =>
+          ({ kind: item && item.type === 'tab' ? 'tab' : 'other', item }));
+      }
+    }
+
     renderResults(query = '') {
-      if (!this.currentResults.length) {
+      this.rebuildDisplayRows(query);
+
+      if (!this.displayRows.length) {
         this.showEmpty();
         return;
       }
 
       this.resultsContainer.innerHTML = '';
 
-      this.currentResults.forEach((item, index) => {
-        const resultElement = this.createResultElement(item, index, query);
-        this.resultsContainer.appendChild(resultElement);
+      this.displayRows.forEach((row, index) => {
+        const rowElement = this.createRowElement(row, index, query);
+        this.resultsContainer.appendChild(rowElement);
       });
-      
-      // 自动选中第一项
-      if (this.currentResults.length > 0) {
-        this.selectedIndex = 0;
-        this.updateSelection();
-      }
 
-      // 列表异步重建（如 history 拉取回来后 rerankAndRender）若鼠标仍在某项上
-      // 但未触发新 mousemove，selectedIndex 已被重置为 0 而 .pn-mouse-active 还在，
-      // CSS :hover 会让光标下那条也高亮 → 又出现"两个选中"。
-      // 这里用缓存的鼠标坐标 + shadowRoot.elementFromPoint 续上同步。
+      // 自动选中第一项
+      this.selectedIndex = 0;
+      this.updateSelection();
+
+      // 见原注释:异步重建后续上鼠标 hover 同步,避免"两个高亮"。
       this._syncSelectionToMouse();
 
       // 初始编号（异步等 layout 稳定后再算）
       requestAnimationFrame(() => this.updateNumberBadges());
-      
-      // 更新结果计数显示（排除搜索选项）
-      const actualResultsCount = this.currentResults.filter(item => item.type !== 'search').length;
+
+      // 更新结果计数显示:组头按其代表的标签数计、展开的成员不重复计、合成搜索行不计。
+      const actualResultsCount = this.displayRows.reduce((acc, row) => {
+        if (row.kind === 'group') return acc + row.count;          // 组头代表 row.count 个标签
+        if (row.kind === 'tab' && row.groupDomain) return acc;     // 展开的成员:已在组头计数里
+        if (row.item && row.item.type === 'search') return acc;    // 跳过合成的"搜索网页"选项
+        return acc + 1;                                            // 独立标签 或 历史/常用/书签
+      }, 0);
       this.updateResultsCount(actualResultsCount);
     }
     
-    createResultElement(item, index, query = '') {
+    createRowElement(row, index, query = '') {
+      if (row.kind === 'group') {
+        return this.createGroupElement(row, index);
+      }
+      return this.createResultElement(row.item, index, query, row);
+    }
+
+    createGroupElement(row, index) {
+      const element = document.createElement('div');
+      element.className = 'pounce-search-result pounce-group-header';
+      element.dataset.index = String(index);
+      if (index === this.selectedIndex) {
+        element.classList.add('selected');
+      }
+
+      const num = document.createElement('div');
+      num.className = 'pounce-result-number';
+
+      const caret = document.createElement('div');
+      caret.className = 'pounce-group-caret';
+      caret.textContent = row.expanded ? '▾' : '▸';
+
+      const icon = document.createElement('div');
+      icon.className = 'pounce-result-icon tab';
+      const firstTab = row.tabs && row.tabs[0];
+      const favIconUrl = firstTab ? this.getSafeFaviconUrl(firstTab) : '';
+      const fallbackChar = (row.domain && row.domain[0] ? row.domain[0] : '?').toUpperCase();
+      if (favIconUrl && !favIconUrl.startsWith('chrome://')) {
+        const img = document.createElement('img');
+        img.referrerPolicy = 'no-referrer';
+        img.src = favIconUrl;
+        img.alt = row.domain;
+        img.onerror = function() {
+          icon.innerHTML = '';
+          icon.textContent = fallbackChar;
+        };
+        icon.appendChild(img);
+      } else {
+        icon.textContent = fallbackChar;
+      }
+
+      const content = document.createElement('div');
+      content.className = 'pounce-result-content';
+      const title = document.createElement('div');
+      title.className = 'pounce-result-title';
+      title.textContent = row.domain;
+      const sub = document.createElement('div');
+      sub.className = 'pounce-result-url';
+      sub.textContent = window.i18n
+        ? window.i18n.t('overlay_tabCount', [String(row.count)])
+        : `${row.count} tabs`;
+      content.appendChild(title);
+      content.appendChild(sub);
+
+      element.appendChild(num);
+      element.appendChild(caret);
+      element.appendChild(icon);
+      element.appendChild(content);
+
+      element.addEventListener('click', () => {
+        this.selectResult(index);
+      });
+
+      return element;
+    }
+
+    createResultElement(item, index, query = '', row = null) {
       const element = document.createElement('div');
       element.className = 'pounce-search-result';
+      if (row && row.groupDomain) {
+        element.classList.add('pounce-group-member');
+      }
       element.dataset.index = String(index);
       if (index === this.selectedIndex) {
         element.classList.add('selected');
@@ -1202,14 +1294,28 @@
         element.appendChild(badge);
       }
       
+      // 标签页行:右侧 ✕ 关闭按钮(hover/选中时显现)
+      if (item.type === 'tab') {
+        const closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'pounce-result-close';
+        closeBtn.textContent = '✕';
+        closeBtn.setAttribute('aria-label', window.i18n ? window.i18n.t('overlay_closeTab') : 'Close tab');
+        closeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.closeTabAtIndex(index);
+        });
+        element.appendChild(closeBtn);
+      }
+
       // Click handler
       element.addEventListener('click', () => {
         this.selectResult(index);
       });
-      
+
       return element;
     }
-    
+
     handleKeyDown(e) {
       // IME 组词期间 Enter/方向键属于输入法候选操作；keyCode 229 兜底浏览器不报 isComposing 的场景。
       if (this.isComposing || e.keyCode === 229) return;
@@ -1220,20 +1326,32 @@
         return;
       }
 
+      // ⌘⌫(Mac)/ Ctrl+⌫:关闭当前选中的标签页行。普通 Backspace 不拦截(留给搜索框删字)。
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Backspace') {
+        if (this.selectedIndex >= 0 && this.selectedIndex < this.displayRows.length) {
+          const sel = this.displayRows[this.selectedIndex];
+          if (sel && sel.kind === 'tab') {
+            e.preventDefault();
+            this.closeTabAtIndex(this.selectedIndex);
+          }
+        }
+        return;
+      }
+
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
           this.moveSelection(1);
           break;
-          
+
         case 'ArrowUp':
           e.preventDefault();
           this.moveSelection(-1);
           break;
-          
+
         case 'Enter':
           e.preventDefault();
-          if (this.selectedIndex >= 0 && this.selectedIndex < this.currentResults.length) {
+          if (this.selectedIndex >= 0 && this.selectedIndex < this.displayRows.length) {
             this.selectResult(this.selectedIndex);
           }
           break;
@@ -1260,18 +1378,18 @@
     }
     
     moveSelection(direction) {
-      if (!this.currentResults.length) return;
-      
+      if (!this.displayRows.length) return;
+
       const newIndex = this.selectedIndex + direction;
-      
-      if (newIndex >= 0 && newIndex < this.currentResults.length) {
+
+      if (newIndex >= 0 && newIndex < this.displayRows.length) {
         this.selectedIndex = newIndex;
       } else if (newIndex < 0) {
-        this.selectedIndex = this.currentResults.length - 1;
+        this.selectedIndex = this.displayRows.length - 1;
       } else {
         this.selectedIndex = 0;
       }
-      
+
       this.updateSelection();
     }
     
@@ -1317,10 +1435,20 @@
     }
 
     async selectResult(index) {
-      if (index < 0 || index >= this.currentResults.length) return;
-      
-      const item = this.currentResults[index];
-      
+      if (index < 0 || index >= this.displayRows.length) return;
+
+      const row = this.displayRows[index];
+      if (!row) return;
+
+      // 组头:回车/点击 = 展开或收起
+      if (row.kind === 'group') {
+        this.toggleGroup(row.domain, index);
+        return;
+      }
+
+      const item = row.item;
+      if (!item) return;
+
       try {
         if (item.type === 'search') {
           const searchQuery = item.url.replace('search:', '');
@@ -1358,6 +1486,42 @@
         this.hide();
       } catch (error) {
         console.error('Pounce: Error selecting result:', error);
+      }
+    }
+
+    // 展开/收起某域名分组,保持选中停在该组头(组头自身行号不变)。
+    toggleGroup(domain, index) {
+      if (this.expandedGroups.has(domain)) {
+        this.expandedGroups.delete(domain);
+      } else {
+        this.expandedGroups.add(domain);
+      }
+      this.renderResults(this.searchInput ? this.searchInput.value : '');
+      if (this.displayRows.length) {
+        this.selectedIndex = Math.min(index, this.displayRows.length - 1);
+        this.updateSelection();
+      }
+    }
+
+    // 关闭某显示行对应的标签页:发后台消息 + 本地乐观删除 + 重渲染并续上选中。
+    closeTabAtIndex(index) {
+      if (index < 0 || index >= this.displayRows.length) return;
+      const row = this.displayRows[index];
+      if (!row || row.kind !== 'tab' || !row.item || row.item.type !== 'tab') return;
+      const tabId = row.item.id;
+
+      chrome.runtime.sendMessage({ action: 'closeTab', tabId }).catch(() => {});
+
+      const dropTab = (arr) => Array.isArray(arr)
+        ? arr.filter((it) => !(it && it.type === 'tab' && it.id === tabId))
+        : arr;
+      this.allData = dropTab(this.allData);
+      this.currentResults = dropTab(this.currentResults);
+
+      this.renderResults(this.searchInput ? this.searchInput.value : '');
+      if (this.displayRows.length) {
+        this.selectedIndex = Math.min(index, this.displayRows.length - 1);
+        this.updateSelection();
       }
     }
     
