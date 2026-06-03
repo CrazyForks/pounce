@@ -20,6 +20,13 @@
             "default": "Alt+K",
             "mac": "Command+K"
          }
+      },
+      "duplicate-current-tab": {
+         "description": "__MSG_cmd_duplicate_tab__",
+         "suggested_key": {
+            "default": "Ctrl+Shift+D",
+            "mac": "Alt+D"
+         }
       }
    },
    "default_locale": "en",
@@ -35,7 +42,7 @@
    "options_page": "options.html",
    "permissions": [ "storage", "tabs", "notifications", "bookmarks", "history", "topSites", "scripting", "activeTab", "search", "favicon" ],
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "1.5.8",
+   "version": "1.5.9",
    "web_accessible_resources": [
       {
          "matches": [ "<all_urls>" ],

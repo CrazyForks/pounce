@@ -19,6 +19,10 @@
     "message": "搜索打开的标签页和书签",
     "description": "Description of the search keyboard command"
   },
+  "cmd_duplicate_tab": {
+    "message": "复制当前标签页",
+    "description": "复制当前 tab 快捷键的描述"
+  },
   "popup_searchTabsBookmarks": {
     "message": "搜索标签页与书签",
     "description": "Primary search button label in popup (both has-URLs and empty states)"
@@ -166,6 +170,10 @@
   "options_batchOpen": {
     "message": "批量打开",
     "description": "Shortcut label for batch-open command in options page"
+  },
+  "options_duplicateTab": {
+    "message": "复制标签页",
+    "description": "Shortcut label for duplicate-current-tab command in options page"
   },
   "options_navigate": {
     "message": "导航",

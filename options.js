@@ -64,6 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function loadShortcuts() {
     const searchKeyEl = document.getElementById('shortcut-search');
     const batchKeyEl = document.getElementById('shortcut-batch');
+    const dupKeyEl = document.getElementById('shortcut-duplicate');
     const heroKeyEl = document.getElementById('heroShortcut');
 
     try {
@@ -73,6 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (searchKeyEl) renderShortcut(searchKeyEl, map['search-tabs-bookmarks']);
       if (batchKeyEl)  renderShortcut(batchKeyEl,  map['open-all-urls']);
+      if (dupKeyEl)    renderShortcut(dupKeyEl,    map['duplicate-current-tab']);
       if (heroKeyEl)   renderShortcut(heroKeyEl,   map['search-tabs-bookmarks']);
     } catch (e) {
       // 降级：平台推断
@@ -81,6 +83,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const searchFallback = isMac ? 'Command+K' : 'Alt+K';
       if (searchKeyEl) renderShortcut(searchKeyEl, searchFallback);
       if (batchKeyEl)  renderShortcut(batchKeyEl,  isMac ? 'Command+Shift+U' : 'Ctrl+Shift+U');
+      if (dupKeyEl)    renderShortcut(dupKeyEl,    isMac ? 'Alt+D' : 'Ctrl+Shift+D');
       if (heroKeyEl)   renderShortcut(heroKeyEl,   searchFallback);
     }
   }

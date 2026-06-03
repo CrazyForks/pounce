@@ -42,10 +42,17 @@ function tFromDict(dict, key, substitutions) {
   return out;
 }
 
+// 复制当前活动 tab 到右侧新 tab 并聚焦（依赖 chrome.tabs.duplicate 默认行为）
+async function duplicateCurrentTab() {
+  const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  if (!tab) return;
+  await chrome.tabs.duplicate(tab.id);
+}
+
 // 处理快捷键命令
 chrome.commands.onCommand.addListener((command) => {
   console.log('Pounce: Command received:', command);
-  
+
   if (command === 'open-all-urls') {
     openAllUrls().catch(error => {
       console.error('Error executing open-all-urls command:', error);
@@ -53,6 +60,10 @@ chrome.commands.onCommand.addListener((command) => {
   } else if (command === 'search-tabs-bookmarks') {
     showSearchOverlay().catch(error => {
       console.error('Error executing search-tabs-bookmarks command:', error);
+    });
+  } else if (command === 'duplicate-current-tab') {
+    duplicateCurrentTab().catch(error => {
+      console.error('Error executing duplicate-current-tab command:', error);
     });
   }
 });

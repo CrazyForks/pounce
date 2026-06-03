@@ -19,6 +19,10 @@
     "message": "Search open tabs and bookmarks",
     "description": "Description of the search keyboard command"
   },
+  "cmd_duplicate_tab": {
+    "message": "Duplicate current tab",
+    "description": "Description of the duplicate-current-tab keyboard command"
+  },
   "popup_searchTabsBookmarks": {
     "message": "Search Tabs & Bookmarks",
     "description": "Primary search button label in popup (both has-URLs and empty states)"
@@ -166,6 +170,10 @@
   "options_batchOpen": {
     "message": "Batch open",
     "description": "Shortcut label for batch-open command in options page"
+  },
+  "options_duplicateTab": {
+    "message": "Duplicate tab",
+    "description": "Shortcut label for duplicate-current-tab command in options page"
   },
   "options_navigate": {
     "message": "Navigate",
