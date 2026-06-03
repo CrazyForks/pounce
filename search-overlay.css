@@ -324,6 +324,47 @@
   opacity: 1;
 }
 
+/* ── Domain group header & close button ── */
+.pounce-group-caret {
+  flex-shrink: 0;
+  width: 12px;
+  text-align: center;
+  font-size: 10px;
+  line-height: 1;
+  color: var(--pn-muted-foreground);
+}
+
+.pounce-group-member {
+  margin-left: 28px;
+}
+
+.pounce-result-close {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--pn-muted-foreground);
+  font-size: 12px;
+  line-height: 1;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.pn-mouse-active .pounce-search-result:hover .pounce-result-close,
+.pounce-search-result.selected .pounce-result-close {
+  opacity: 0.7;
+}
+
+.pounce-result-close:hover {
+  opacity: 1;
+  background-color: var(--pn-border);
+  color: var(--pn-foreground);
+}
+
 /* Empty state */
 .pounce-search-empty {
   padding: 48px 20px;
