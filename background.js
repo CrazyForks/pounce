@@ -541,6 +541,7 @@ async function injectAndShow(tabId, bridgeTabId) {
       'pinyin-index.js',
       'pinyin-matcher.js',
       'search-ranking.js',
+      'tab-grouping.js',
       'search-overlay.js',
     ],
   });
