@@ -463,6 +463,15 @@
     "message": "No matching tabs, history, bookmarks, or top sites found",
     "description": "Empty state when search returns 0 results"
   },
+  "overlay_tabCount": {
+    "message": "$count$ tabs",
+    "description": "Group header label: number of tabs in a domain group",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "overlay_closeTab": {
+    "message": "Close tab",
+    "description": "Accessible label for the close (x) button on a tab result"
+  },
   "overlay_searchForQuery": {
     "message": "Search for \"$query$\"",
     "description": "Synthetic web-search row title in overlay",
