@@ -164,6 +164,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     chrome.tabs.remove(request.tabId).catch(() => {});
     sendResponse({ success: true });
     return true;
+  } else if (request.action === 'closeTab') {
+    // 关闭指定标签页;标签可能已被外部关掉,忽略错误。
+    chrome.tabs.remove(request.tabId)
+      .then(() => sendResponse({ success: true }))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true; // 保持消息通道开放
   } else if (request.action === 'showSearchOverlay') {
     showSearchOverlay()
       .then(() => {
