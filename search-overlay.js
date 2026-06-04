@@ -1092,7 +1092,15 @@
 
     rebuildDisplayRows(query) {
       const grouping = window.PounceTabGrouping;
-      const nonTabLimit = this.searchPreferences.resultsLimit || DEFAULT_SEARCH_PREFERENCES.resultsLimit;
+      const limit = this.searchPreferences.resultsLimit || DEFAULT_SEARCH_PREFERENCES.resultsLimit;
+      // 浏览态标签页全展示(绕过上限),非标签段只填到「上限 - 标签数」,使可见总数不超过上限。
+      // 仅当打开的标签本身就超过上限时,总数才会超过(此时保证标签全可见优先)。
+      const trimmed = String(query || '').trim();
+      let nonTabLimit = limit;
+      if (!trimmed) {
+        const tabCount = (this.currentResults || []).filter((it) => it && it.type === 'tab').length;
+        nonTabLimit = Math.max(0, limit - tabCount);
+      }
       if (grouping && typeof grouping.buildDisplayRows === 'function') {
         this.displayRows = grouping.buildDisplayRows(this.currentResults, {
           query,
