@@ -419,6 +419,19 @@
       margin-bottom: 1px;
     }
 
+    .setting-badge {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--primary);
+      background: var(--hover);
+      vertical-align: middle;
+    }
+
     .setting-desc {
       font-size: 12px;
       color: var(--muted);
@@ -657,6 +670,19 @@
   <div class="section">
     <div class="section-label" data-i18n="options_searchExperience">Search Experience</div>
     <div class="settings-list">
+      <label class="setting-row">
+        <div class="setting-copy">
+          <div class="setting-title">
+            <span data-i18n="options_tabGrouping">Group tabs by domain</span>
+            <span class="setting-badge" data-i18n="options_experimentalBadge">Experimental</span>
+          </div>
+          <div class="setting-desc" data-i18n="options_tabGroupingDesc">In ⌘K, collapse same-domain open tabs into one expandable row.</div>
+        </div>
+        <span class="toggle">
+          <input type="checkbox" id="tabGroupingEnabled">
+          <span class="toggle-slider"></span>
+        </span>
+      </label>
       <label class="setting-row">
         <div class="setting-copy">
           <div class="setting-title" data-i18n="options_quickPick">Quick pick</div>

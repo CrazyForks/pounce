@@ -147,6 +147,18 @@
     "message": "Open visible results with Alt/Option + 1-9.",
     "description": "Quick pick description"
   },
+  "options_tabGrouping": {
+    "message": "Group tabs by domain",
+    "description": "Tab grouping toggle label in options page"
+  },
+  "options_tabGroupingDesc": {
+    "message": "In ⌘K, collapse same-domain open tabs into one expandable row.",
+    "description": "Tab grouping toggle description"
+  },
+  "options_experimentalBadge": {
+    "message": "Experimental",
+    "description": "Badge marking a setting as an experimental feature"
+  },
   "options_heroTitle": {
     "message": "Open Pounce on any page",
     "description": "Hero card title on options page — primary feature pitch"

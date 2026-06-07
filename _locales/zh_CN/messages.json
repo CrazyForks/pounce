@@ -147,6 +147,18 @@
     "message": "使用 Alt/Option + 1-9 直接打开当前可见的结果。",
     "description": "Quick pick description"
   },
+  "options_tabGrouping": {
+    "message": "按域名折叠标签页",
+    "description": "标签分组开关标签"
+  },
+  "options_tabGroupingDesc": {
+    "message": "在 ⌘K 里把同域名的打开标签页折叠成一个可展开的分组。",
+    "description": "标签分组开关描述"
+  },
+  "options_experimentalBadge": {
+    "message": "实验性",
+    "description": "标记某设置为实验性功能的徽标"
+  },
   "options_heroTitle": {
     "message": "在任意网页打开 Pounce",
     "description": "Hero card title on options page — primary feature pitch"

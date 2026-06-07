@@ -20,8 +20,14 @@ test('explicit disabled search preferences are preserved', () => {
   }), {
     quickPickEnabled: false,
     pinyinMatchingEnabled: false,
+    tabGroupingEnabled: DEFAULT_SEARCH_PREFERENCES.tabGroupingEnabled,
     resultsLimit: DEFAULT_SEARCH_PREFERENCES.resultsLimit
   });
+});
+
+test('tabGroupingEnabled defaults to false (opt-in feature)', () => {
+  assert.equal(normalizeSearchPreferences({}).tabGroupingEnabled, false);
+  assert.equal(normalizeSearchPreferences({ tabGroupingEnabled: true }).tabGroupingEnabled, true);
 });
 
 test('non-boolean search preferences fall back to defaults', () => {

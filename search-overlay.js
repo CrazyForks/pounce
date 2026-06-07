@@ -33,6 +33,7 @@
   const DEFAULT_SEARCH_PREFERENCES = PREFERENCES.DEFAULT_SEARCH_PREFERENCES || {
     quickPickEnabled: true,
     pinyinMatchingEnabled: true,
+    tabGroupingEnabled: false,
     resultsLimit: 10
   };
   const ALLOWED_RESULTS_LIMITS = PREFERENCES.ALLOWED_RESULTS_LIMITS || [10, 20, 50];
@@ -500,9 +501,14 @@
         this.searchPreferences = normalizeSearchPreferences({
           quickPickEnabled: changes.quickPickEnabled ? changes.quickPickEnabled.newValue : this.searchPreferences.quickPickEnabled,
           pinyinMatchingEnabled: changes.pinyinMatchingEnabled ? changes.pinyinMatchingEnabled.newValue : this.searchPreferences.pinyinMatchingEnabled,
+          tabGroupingEnabled: changes.tabGroupingEnabled ? changes.tabGroupingEnabled.newValue : this.searchPreferences.tabGroupingEnabled,
           resultsLimit: changes.resultsLimit ? changes.resultsLimit.newValue : this.searchPreferences.resultsLimit
         });
         this.applySearchPreferences();
+        // 分组开关/上限变化时,若浮层正开着,重排重渲染让其立刻生效。
+        if (this.isVisible && this.searchInput) {
+          this.rerankAndRender(this.searchInput.value);
+        }
       };
       chrome.storage.onChanged.addListener(this.storageChangeHandler);
 
@@ -855,9 +861,11 @@
         : this.allData;
 
       const limit = this.searchPreferences.resultsLimit || DEFAULT_SEARCH_PREFERENCES.resultsLimit;
-      // 浏览态(空查询)要覆盖全部打开标签 → 不截断;非标签段在 buildDisplayRows 里按 limit 截断。
+      // 仅当「分组开启 且 浏览态(空查询)」才覆盖全部打开标签(不截断);
+      // 否则用常规上限(分组关闭时即旧行为)。非标签段在 buildDisplayRows 里按 limit 截断。
       const trimmed = String(query || '').trim();
-      const effectiveLimit = trimmed ? limit : ((merged && merged.length) || limit);
+      const bypassLimit = !trimmed && !!this.searchPreferences.tabGroupingEnabled;
+      const effectiveLimit = bypassLimit ? ((merged && merged.length) || limit) : limit;
       if (window.PounceSearchUtils && typeof window.PounceSearchUtils.rankResults === 'function') {
         this.currentResults = window.PounceSearchUtils.rankResults(merged, query, effectiveLimit);
       } else {
@@ -1092,6 +1100,7 @@
 
     rebuildDisplayRows(query) {
       const grouping = window.PounceTabGrouping;
+      const groupingOn = !!this.searchPreferences.tabGroupingEnabled;
       const limit = this.searchPreferences.resultsLimit || DEFAULT_SEARCH_PREFERENCES.resultsLimit;
       // 浏览态标签页全展示(绕过上限),非标签段只填到「上限 - 标签数」,使可见总数不超过上限。
       // 仅当打开的标签本身就超过上限时,总数才会超过(此时保证标签全可见优先)。
@@ -1101,7 +1110,7 @@
         const tabCount = (this.currentResults || []).filter((it) => it && it.type === 'tab').length;
         nonTabLimit = Math.max(0, limit - tabCount);
       }
-      if (grouping && typeof grouping.buildDisplayRows === 'function') {
+      if (groupingOn && grouping && typeof grouping.buildDisplayRows === 'function') {
         this.displayRows = grouping.buildDisplayRows(this.currentResults, {
           query,
           expandedGroups: this.expandedGroups,

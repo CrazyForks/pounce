@@ -122,6 +122,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const themeSelect = document.getElementById('themeSelect');
   const quickPickToggle = document.getElementById('quickPickEnabled');
   const pinyinMatchingToggle = document.getElementById('pinyinMatchingEnabled');
+  const tabGroupingToggle = document.getElementById('tabGroupingEnabled');
   const resultsLimitSelect = document.getElementById('resultsLimit');
   const preferenceKeys = window.PouncePreferences.SEARCH_PREFERENCE_KEYS;
   const normalizeSearchPreferences = window.PouncePreferences.normalizeSearchPreferences;
@@ -465,6 +466,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         saveSearchPreference('pinyinMatchingEnabled', pinyinMatchingToggle.checked);
       });
 
+      tabGroupingToggle.addEventListener('change', () => {
+        saveSearchPreference('tabGroupingEnabled', tabGroupingToggle.checked);
+      });
+
       resultsLimitSelect.addEventListener('change', () => {
         saveSearchPreference('resultsLimit', Number(resultsLimitSelect.value));
       });
@@ -477,6 +482,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         applySearchPreferenceToggles(normalizeSearchPreferences({
           quickPickEnabled: changes.quickPickEnabled ? changes.quickPickEnabled.newValue : quickPickToggle.checked,
           pinyinMatchingEnabled: changes.pinyinMatchingEnabled ? changes.pinyinMatchingEnabled.newValue : pinyinMatchingToggle.checked,
+          tabGroupingEnabled: changes.tabGroupingEnabled ? changes.tabGroupingEnabled.newValue : tabGroupingToggle.checked,
           resultsLimit: changes.resultsLimit ? changes.resultsLimit.newValue : Number(resultsLimitSelect.value)
         }));
       });
@@ -488,6 +494,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function applySearchPreferenceToggles(preferences) {
     quickPickToggle.checked = preferences.quickPickEnabled;
     pinyinMatchingToggle.checked = preferences.pinyinMatchingEnabled;
+    tabGroupingToggle.checked = preferences.tabGroupingEnabled;
     resultsLimitSelect.value = String(preferences.resultsLimit);
   }
 
