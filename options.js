@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const searchFallback = isMac ? 'Command+K' : 'Alt+K';
       if (searchKeyEl) renderShortcut(searchKeyEl, searchFallback);
       if (batchKeyEl)  renderShortcut(batchKeyEl,  isMac ? 'Command+Shift+U' : 'Ctrl+Shift+U');
-      if (dupKeyEl)    renderShortcut(dupKeyEl,    isMac ? 'Alt+D' : 'Ctrl+Shift+D');
+      if (dupKeyEl)    renderShortcut(dupKeyEl,    isMac ? 'Command+E' : 'Ctrl+Shift+E');
       if (heroKeyEl)   renderShortcut(heroKeyEl,   searchFallback);
     }
   }

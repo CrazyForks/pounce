@@ -24,8 +24,8 @@
       "duplicate-current-tab": {
          "description": "__MSG_cmd_duplicate_tab__",
          "suggested_key": {
-            "default": "Ctrl+Shift+D",
-            "mac": "Alt+D"
+            "default": "Ctrl+Shift+E",
+            "mac": "Command+E"
          }
       }
    },

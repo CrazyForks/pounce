@@ -41,7 +41,7 @@ Keyboard-first, doesn't leave your current page.
 |--------|-----|-----------------|
 | Open search overlay | `⌘K` | `Alt+K` |
 | Batch open saved URLs | `⌘⇧U` | `Ctrl+Shift+U` |
-| Duplicate current tab | `⌥D` | `Ctrl+Shift+D` |
+| Duplicate current tab | `⌘E` | `Ctrl+Shift+E` |
 | Navigate results | `↑` / `↓` | `↑` / `↓` |
 | Open selected result | `Enter` | `Enter` |
 | Quick-pick result 1–9 | `⌥1`–`⌥9` | `Alt+1`–`Alt+9` |
