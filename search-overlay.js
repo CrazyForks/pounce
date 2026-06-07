@@ -498,12 +498,13 @@
         if (area !== 'sync') return;
         if (!SEARCH_PREFERENCE_KEYS.some(key => changes[key])) return;
 
-        this.searchPreferences = normalizeSearchPreferences({
-          quickPickEnabled: changes.quickPickEnabled ? changes.quickPickEnabled.newValue : this.searchPreferences.quickPickEnabled,
-          pinyinMatchingEnabled: changes.pinyinMatchingEnabled ? changes.pinyinMatchingEnabled.newValue : this.searchPreferences.pinyinMatchingEnabled,
-          tabGroupingEnabled: changes.tabGroupingEnabled ? changes.tabGroupingEnabled.newValue : this.searchPreferences.tabGroupingEnabled,
-          resultsLimit: changes.resultsLimit ? changes.resultsLimit.newValue : this.searchPreferences.resultsLimit
-        });
+        // 用偏好键表重建,避免每加一个偏好都要在这里补一行。
+        this.searchPreferences = normalizeSearchPreferences(
+          SEARCH_PREFERENCE_KEYS.reduce((acc, key) => {
+            acc[key] = changes[key] ? changes[key].newValue : this.searchPreferences[key];
+            return acc;
+          }, {})
+        );
         this.applySearchPreferences();
         // 分组开关/上限变化时,若浮层正开着,重排重渲染让其立刻生效。
         if (this.isVisible && this.searchInput) {
@@ -1101,29 +1102,28 @@
     rebuildDisplayRows(query) {
       const grouping = window.PounceTabGrouping;
       const groupingOn = !!this.searchPreferences.tabGroupingEnabled;
-      const limit = this.searchPreferences.resultsLimit || DEFAULT_SEARCH_PREFERENCES.resultsLimit;
-      // 浏览态标签页全展示(绕过上限),非标签段只填到「上限 - 标签数」,使可见总数不超过上限。
-      // 仅当打开的标签本身就超过上限时,总数才会超过(此时保证标签全可见优先)。
-      const trimmed = String(query || '').trim();
-      let nonTabLimit = limit;
-      if (!trimmed) {
-        const tabCount = (this.currentResults || []).filter((it) => it && it.type === 'tab').length;
-        nonTabLimit = Math.max(0, limit - tabCount);
-      }
       if (groupingOn && grouping && typeof grouping.buildDisplayRows === 'function') {
+        const limit = this.searchPreferences.resultsLimit || DEFAULT_SEARCH_PREFERENCES.resultsLimit;
+        // 浏览态标签页全展示(绕过上限),非标签段只填到「上限 - 标签数」,使可见总数不超过上限。
+        // 仅当打开的标签本身就超过上限时,总数才会超过(此时保证标签全可见优先)。
+        let nonTabLimit = limit;
+        if (!String(query || '').trim()) {
+          const tabCount = (this.currentResults || []).filter((it) => it && it.type === 'tab').length;
+          nonTabLimit = Math.max(0, limit - tabCount);
+        }
         this.displayRows = grouping.buildDisplayRows(this.currentResults, {
           query,
           expandedGroups: this.expandedGroups,
           nonTabLimit,
         });
       } else {
-        // 降级:不分组,平铺。
+        // 分组关闭(或模块缺失):平铺,每条一行(标签页仍有 ✕、仍可 ⌘⌫ 关闭)。
         this.displayRows = (this.currentResults || []).map((item) =>
           ({ kind: item && item.type === 'tab' ? 'tab' : 'other', item }));
       }
     }
 
-    renderResults(query = '') {
+    renderResults(query = '', restoreIndex = 0) {
       this.rebuildDisplayRows(query);
 
       if (!this.displayRows.length) {
@@ -1133,13 +1133,19 @@
 
       this.resultsContainer.innerHTML = '';
 
+      // 渲染各行的同时累加计数:组头按其代表的标签数计、展开的成员不重复计、合成搜索行不计。
+      let actualResultsCount = 0;
       this.displayRows.forEach((row, index) => {
-        const rowElement = this.createRowElement(row, index, query);
-        this.resultsContainer.appendChild(rowElement);
+        this.resultsContainer.appendChild(this.createRowElement(row, index, query));
+        if (row.kind === 'group') {
+          actualResultsCount += row.count;
+        } else if (!(row.kind === 'tab' && row.groupDomain) && !(row.item && row.item.type === 'search')) {
+          actualResultsCount += 1;
+        }
       });
 
-      // 自动选中第一项
-      this.selectedIndex = 0;
+      // 选中目标行(默认第一项;展开/关闭等场景由调用方传入要恢复的行号),只渲染一次高亮。
+      this.selectedIndex = Math.min(Math.max(0, restoreIndex), this.displayRows.length - 1);
       this.updateSelection();
 
       // 见原注释:异步重建后续上鼠标 hover 同步,避免"两个高亮"。
@@ -1148,16 +1154,26 @@
       // 初始编号（异步等 layout 稳定后再算）
       requestAnimationFrame(() => this.updateNumberBadges());
 
-      // 更新结果计数显示:组头按其代表的标签数计、展开的成员不重复计、合成搜索行不计。
-      const actualResultsCount = this.displayRows.reduce((acc, row) => {
-        if (row.kind === 'group') return acc + row.count;          // 组头代表 row.count 个标签
-        if (row.kind === 'tab' && row.groupDomain) return acc;     // 展开的成员:已在组头计数里
-        if (row.item && row.item.type === 'search') return acc;    // 跳过合成的"搜索网页"选项
-        return acc + 1;                                            // 独立标签 或 历史/常用/书签
-      }, 0);
       this.updateResultsCount(actualResultsCount);
     }
     
+    // 给图标容器填入 favicon <img>(加载失败回退到字符);无可用图标时直接显示回退字符。
+    _buildFaviconIcon(icon, favIconUrl, altText, fallbackChar) {
+      if (favIconUrl && !favIconUrl.startsWith('chrome://')) {
+        const img = document.createElement('img');
+        img.referrerPolicy = 'no-referrer';
+        img.src = favIconUrl;
+        img.alt = altText;
+        img.onerror = () => {
+          icon.innerHTML = '';
+          icon.textContent = fallbackChar;
+        };
+        icon.appendChild(img);
+      } else {
+        icon.textContent = fallbackChar;
+      }
+    }
+
     createRowElement(row, index, query = '') {
       if (row.kind === 'group') {
         return this.createGroupElement(row, index);
@@ -1185,19 +1201,7 @@
       const firstTab = row.tabs && row.tabs[0];
       const favIconUrl = firstTab ? this.getSafeFaviconUrl(firstTab) : '';
       const fallbackChar = (row.domain && row.domain[0] ? row.domain[0] : '?').toUpperCase();
-      if (favIconUrl && !favIconUrl.startsWith('chrome://')) {
-        const img = document.createElement('img');
-        img.referrerPolicy = 'no-referrer';
-        img.src = favIconUrl;
-        img.alt = row.domain;
-        img.onerror = function() {
-          icon.innerHTML = '';
-          icon.textContent = fallbackChar;
-        };
-        icon.appendChild(img);
-      } else {
-        icon.textContent = fallbackChar;
-      }
+      this._buildFaviconIcon(icon, favIconUrl, row.domain, fallbackChar);
 
       const content = document.createElement('div');
       content.className = 'pounce-result-content';
@@ -1250,22 +1254,8 @@
       const favIconUrl = this.getSafeFaviconUrl(item);
 
       if (item.type !== 'search') {
-        if (favIconUrl && !favIconUrl.startsWith('chrome://')) {
-          // 使用实际的网页图标（跳过 chrome:// 图标，浏览器会阻止加载）
-          const img = document.createElement('img');
-          img.referrerPolicy = 'no-referrer';
-          img.src = favIconUrl;
-          img.alt = item.displayTitle || item.title || (window.i18n ? window.i18n.t('overlay_websiteIconAlt') : 'Website icon');
-          img.onerror = function() {
-            // 如果图标加载失败，显示默认文字
-            icon.innerHTML = '';
-            icon.textContent = item.iconFallback || '?';
-          };
-          icon.appendChild(img);
-        } else {
-          // 没有图标URL时显示默认文字
-          icon.textContent = item.iconFallback || '?';
-        }
+        const iconAlt = item.displayTitle || item.title || (window.i18n ? window.i18n.t('overlay_websiteIconAlt') : 'Website icon');
+        this._buildFaviconIcon(icon, favIconUrl, iconAlt, item.iconFallback || '?');
       }
       
       // Content
@@ -1513,11 +1503,7 @@
       } else {
         this.expandedGroups.add(domain);
       }
-      this.renderResults(this.searchInput ? this.searchInput.value : '');
-      if (this.displayRows.length) {
-        this.selectedIndex = Math.min(index, this.displayRows.length - 1);
-        this.updateSelection();
-      }
+      this.renderResults(this.searchInput ? this.searchInput.value : '', index);
     }
 
     // 关闭某显示行对应的标签页:发后台消息 + 本地乐观删除 + 重渲染并续上选中。
@@ -1535,11 +1521,7 @@
       this.allData = dropTab(this.allData);
       this.currentResults = dropTab(this.currentResults);
 
-      this.renderResults(this.searchInput ? this.searchInput.value : '');
-      if (this.displayRows.length) {
-        this.selectedIndex = Math.min(index, this.displayRows.length - 1);
-        this.updateSelection();
-      }
+      this.renderResults(this.searchInput ? this.searchInput.value : '', index);
     }
     
     showLoading() {
