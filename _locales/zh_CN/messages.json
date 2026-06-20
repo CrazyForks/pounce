@@ -1,14 +1,14 @@
 {
   "ext_name": {
-    "message": "Pounce —— ⌘K 一键找到一切",
+    "message": "Pounce —— ⌘K 快捷搜索标签页·历史·书签",
     "description": "Extension name shown in Chrome Web Store and chrome://extensions"
   },
   "ext_description": {
-    "message": "一个快捷键，找到浏览器里的任何东西。按 ⌘K 同时搜索打开的标签页、书签、历史记录和常用站点。",
+    "message": "按 ⌘K 即刻搜索打开的标签页、历史、书签和常用站点 —— 一键切换标签或打开网页。",
     "description": "Extension description in Chrome Web Store"
   },
   "action_title": {
-    "message": "Pounce —— ⌘K 一键找到一切",
+    "message": "Pounce —— ⌘K 快捷搜索标签页·历史·书签",
     "description": "Toolbar icon tooltip"
   },
   "cmd_open_all": {

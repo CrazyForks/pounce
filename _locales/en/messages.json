@@ -1,14 +1,14 @@
 {
   "ext_name": {
-    "message": "Pounce – Find Anything with ⌘K",
+    "message": "Pounce – ⌘K Tab, History & Bookmark Search",
     "description": "Extension name shown in Chrome Web Store and chrome://extensions"
   },
   "ext_description": {
-    "message": "One keystroke to find anything in your browser. Press ⌘K to search open tabs, bookmarks, history, and top sites.",
+    "message": "Press ⌘K to instantly search open tabs, history, bookmarks and top sites — then switch to a tab or open it in one keystroke.",
     "description": "Extension description in Chrome Web Store"
   },
   "action_title": {
-    "message": "Pounce – Find Anything with ⌘K",
+    "message": "Pounce – ⌘K Tab, History & Bookmark Search",
     "description": "Toolbar icon tooltip"
   },
   "cmd_open_all": {
