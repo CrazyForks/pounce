@@ -506,14 +506,14 @@
 .pounce-hints {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
 }
 
 .pounce-hint {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   white-space: nowrap;
 }
 
@@ -523,14 +523,14 @@
   justify-content: center;
   background: var(--pn-kbd);
   border: 1px solid var(--pn-kbd-border);
-  border-radius: 5px;
-  padding: 1px 5px;
+  border-radius: 4px;
+  padding: 0 4px;
   font-family: var(--pn-mono);
   font-size: 10px;
   font-weight: 500;
   color: var(--pn-text-muted);
-  min-width: 18px;
-  line-height: 1.5;
+  height: 16px;
+  line-height: 1;
 }
 
 /* Animations */

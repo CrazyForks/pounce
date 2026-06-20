@@ -246,15 +246,11 @@
       // 用 DOM 构造而非 innerHTML，以便保留文本节点引用做语言切换刷新
       const navigateHint = document.createElement('span');
       navigateHint.className = 'pounce-hint';
-      const navUpKey = document.createElement('span');
-      navUpKey.className = 'pounce-hint-key';
-      navUpKey.textContent = '↑';
-      const navDownKey = document.createElement('span');
-      navDownKey.className = 'pounce-hint-key';
-      navDownKey.textContent = '↓';
+      const navKey = document.createElement('span');
+      navKey.className = 'pounce-hint-key';
+      navKey.textContent = '↑↓';
       const navigateLabel = document.createTextNode(' ' + (window.i18n ? window.i18n.t('overlay_navigate') : 'Navigate'));
-      navigateHint.appendChild(navUpKey);
-      navigateHint.appendChild(navDownKey);
+      navigateHint.appendChild(navKey);
       navigateHint.appendChild(navigateLabel);
       this.navigateHintEl = navigateLabel;
 
@@ -271,15 +267,11 @@
       const quickPickHint = document.createElement('span');
       quickPickHint.className = 'pounce-hint';
       quickPickHint.setAttribute('data-pounce-quick-pick-hint', '');
-      const quickPickModKey = document.createElement('span');
-      quickPickModKey.className = 'pounce-hint-key';
-      quickPickModKey.textContent = this.shortcutKeyLabel;
-      const quickPickRangeKey = document.createElement('span');
-      quickPickRangeKey.className = 'pounce-hint-key';
-      quickPickRangeKey.textContent = '1-9';
+      const quickPickKey = document.createElement('span');
+      quickPickKey.className = 'pounce-hint-key';
+      quickPickKey.textContent = this.shortcutKeyLabel + ' 1-9';
       const quickPickLabel = document.createTextNode(' ' + (window.i18n ? window.i18n.t('overlay_quickPick') : 'Quick pick'));
-      quickPickHint.appendChild(quickPickModKey);
-      quickPickHint.appendChild(quickPickRangeKey);
+      quickPickHint.appendChild(quickPickKey);
       quickPickHint.appendChild(quickPickLabel);
       this.quickPickHintLabelEl = quickPickLabel;
 
