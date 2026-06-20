@@ -232,7 +232,10 @@
   gap: 12px;
 }
 
-.pn-mouse-active .pounce-search-result:hover {
+/* Hover feedback only on NON-selected rows — otherwise :hover (higher
+   specificity) would override the .selected green border/fill on the row
+   under the cursor, making mouse-selection look different from keyboard. */
+.pn-mouse-active .pounce-search-result:hover:not(.selected) {
   background-color: var(--pn-accent);
   border-color: var(--pn-border);
 }
