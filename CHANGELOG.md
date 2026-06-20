@@ -2,6 +2,13 @@
 
 🌐 **English** · [中文](CHANGELOG.zh-CN.md)
 
+### 1.6.0
+- A dark-first redesign of the whole extension: the ⌘K overlay, the toolbar popup and Settings now share one calm design built around a single green accent (the old overlay blue is retired), in both dark and light — following your system theme by default.
+- New experimental **Tab grouping** (opt-in in Settings): when a site has several open tabs, they collapse into a single row in the overlay with a tab count. Press ↵ to expand it into a tray and switch to any tab, or close the whole group at once.
+- Open tabs that share the same URL now each show up and count on their own, instead of being merged into one.
+- Duplicate the current tab with a shortcut: ⌘E (mac) / Ctrl+Shift+E.
+- Fix: on pages where Pounce can't run directly (file://, view-source:, devtools://, chrome-untrusted://) it now falls back to a usable tab instead of doing nothing.
+
 ### 1.5.8
 - Results count selector in the overlay — pick 10 / 20 / 50 from the footer (also keyboard accessible).
 - Fix: ⌘K input no longer loses focus inside host pages that run their own focus traps (e.g. Quasar QDialog).
