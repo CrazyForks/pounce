@@ -1128,7 +1128,22 @@
       // 渲染各行的同时累加计数:组头按其代表的标签数计、展开的成员不重复计、合成搜索行不计。
       let actualResultsCount = 0;
       this.displayRows.forEach((row, index) => {
-        this.resultsContainer.appendChild(this.createRowElement(row, index, query));
+        const el = this.createRowElement(row, index, query);
+        // Expanded group members go inside a per-domain tray box; everything
+        // else (headers, flat tabs, sources) is a direct child of the list.
+        if (row.kind === 'tab' && row.groupDomain) {
+          const last = this.resultsContainer.lastElementChild;
+          let tray = last;
+          if (!last || !last.classList.contains('pounce-group-tray') || last.dataset.domain !== row.groupDomain) {
+            tray = document.createElement('div');
+            tray.className = 'pounce-group-tray';
+            tray.dataset.domain = row.groupDomain;
+            this.resultsContainer.appendChild(tray);
+          }
+          tray.appendChild(el);
+        } else {
+          this.resultsContainer.appendChild(el);
+        }
         if (row.kind === 'group') {
           actualResultsCount += row.count;
         } else if (!(row.kind === 'tab' && row.groupDomain) && !(row.item && row.item.type === 'search')) {
@@ -1176,18 +1191,22 @@
     createGroupElement(row, index) {
       const element = document.createElement('div');
       element.className = 'pounce-search-result pounce-group-header';
+      if (row.expanded) element.classList.add('expanded');
       element.dataset.index = String(index);
       if (index === this.selectedIndex) {
         element.classList.add('selected');
       }
+      const countLabel = window.i18n
+        ? window.i18n.t('overlay_tabCount', [String(row.count)])
+        : `${row.count} tabs`;
+      element.setAttribute('aria-label', `${row.domain}, ${countLabel}`);
 
+      // Empty number gutter keeps the header's left edge aligned with rows.
       const num = document.createElement('div');
       num.className = 'pounce-result-number';
 
-      const caret = document.createElement('div');
-      caret.className = 'pounce-group-caret';
-      caret.textContent = row.expanded ? '▾' : '▸';
-
+      // Single favicon — every tab of a domain shares the same icon, so there's
+      // nothing to stack; one icon reads cleaner.
       const icon = document.createElement('div');
       icon.className = 'pounce-result-icon tab';
       const firstTab = row.tabs && row.tabs[0];
@@ -1195,23 +1214,59 @@
       const fallbackChar = (row.domain && row.domain[0] ? row.domain[0] : '?').toUpperCase();
       this._buildFaviconIcon(icon, favIconUrl, row.domain, fallbackChar);
 
+      // Domain title.
       const content = document.createElement('div');
       content.className = 'pounce-result-content';
       const title = document.createElement('div');
       title.className = 'pounce-result-title';
       title.textContent = row.domain;
-      const sub = document.createElement('div');
-      sub.className = 'pounce-result-url';
-      sub.textContent = window.i18n
-        ? window.i18n.t('overlay_tabCount', [String(row.count)])
-        : `${row.count} tabs`;
       content.appendChild(title);
-      content.appendChild(sub);
+
+      // Green count pill + "tabs" unit.
+      const count = document.createElement('span');
+      count.className = 'pounce-group-count';
+      count.textContent = String(row.count);
+      const unit = document.createElement('span');
+      unit.className = 'pounce-group-unit';
+      unit.textContent = window.i18n ? window.i18n.t('overlay_tabsUnit') : 'tabs';
+
+      // Close-all-tabs button (revealed on hover/selected like the per-tab ✕).
+      const closeAll = document.createElement('button');
+      closeAll.type = 'button';
+      closeAll.className = 'pounce-result-close pounce-group-close-all';
+      closeAll.textContent = '✕';
+      closeAll.setAttribute('aria-label', window.i18n ? window.i18n.t('overlay_closeAllTabs') : 'Close all tabs');
+      closeAll.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.closeGroupTabsAtIndex(index);
+      });
+
+      // Expand / Collapse hint with the ↵ key that triggers it.
+      const action = document.createElement('span');
+      action.className = 'pounce-group-action';
+      const actionKey = document.createElement('span');
+      actionKey.className = 'pounce-group-action-key';
+      actionKey.textContent = '↵';
+      const actionLabel = document.createElement('span');
+      actionLabel.textContent = window.i18n
+        ? window.i18n.t(row.expanded ? 'overlay_collapse' : 'overlay_expand')
+        : (row.expanded ? 'Collapse' : 'Expand');
+      action.appendChild(actionKey);
+      action.appendChild(actionLabel);
+
+      // Rotating chevron.
+      const chevron = document.createElement('span');
+      chevron.className = 'pounce-group-chevron';
+      chevron.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>';
 
       element.appendChild(num);
-      element.appendChild(caret);
       element.appendChild(icon);
       element.appendChild(content);
+      element.appendChild(count);
+      element.appendChild(unit);
+      element.appendChild(action);
+      element.appendChild(chevron);
+      element.appendChild(closeAll);
 
       element.addEventListener('click', () => {
         this.selectResult(index);
@@ -1515,7 +1570,30 @@
 
       this.renderResults(this.searchInput ? this.searchInput.value : '', index);
     }
-    
+
+    // Close every open tab in a domain group (the group header's "close all").
+    closeGroupTabsAtIndex(index) {
+      if (index < 0 || index >= this.displayRows.length) return;
+      const row = this.displayRows[index];
+      if (!row || row.kind !== 'group' || !Array.isArray(row.tabs)) return;
+      const ids = new Set(
+        row.tabs.filter((t) => t && t.type === 'tab' && t.id != null).map((t) => t.id)
+      );
+      if (!ids.size) return;
+
+      ids.forEach((tabId) => {
+        chrome.runtime.sendMessage({ action: 'closeTab', tabId }).catch(() => {});
+      });
+
+      const dropTabs = (arr) => Array.isArray(arr)
+        ? arr.filter((it) => !(it && it.type === 'tab' && ids.has(it.id)))
+        : arr;
+      this.allData = dropTabs(this.allData);
+      this.currentResults = dropTabs(this.currentResults);
+
+      this.renderResults(this.searchInput ? this.searchInput.value : '', index);
+    }
+
     showLoading() {
       const loadingText = window.i18n ? window.i18n.t('overlay_loading') : 'Loading...';
       this.resultsContainer.innerHTML = '';

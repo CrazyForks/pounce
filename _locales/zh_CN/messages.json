@@ -496,9 +496,25 @@
     "description": "分组头标签:该域名下的标签页数量",
     "placeholders": { "count": { "content": "$1" } }
   },
+  "overlay_tabsUnit": {
+    "message": "标签",
+    "description": "Unit after the group count pill in the stacked-deck group header"
+  },
+  "overlay_expand": {
+    "message": "展开",
+    "description": "Group header action hint when a domain group is collapsed"
+  },
+  "overlay_collapse": {
+    "message": "收起",
+    "description": "Group header action hint when a domain group is expanded"
+  },
   "overlay_closeTab": {
     "message": "关闭标签页",
     "description": "标签页结果上 ✕ 关闭按钮的无障碍标签"
+  },
+  "overlay_closeAllTabs": {
+    "message": "关闭全部标签页",
+    "description": "Accessible label for the close-all button on a domain group header"
   },
   "overlay_searchForQuery": {
     "message": "搜索「$query$」",
