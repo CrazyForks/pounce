@@ -492,22 +492,41 @@
   }
 
   function dedupeResults(results, query, tierCache) {
-    const bestByUrl = new Map();
+    // Open tabs are never merged with each other: N open tabs of the same URL
+    // are N real, switchable tabs, so the count reflects what's actually open.
+    // Non-tab results (history / bookmarks / top sites) still dedupe by URL,
+    // and a non-tab is dropped when it duplicates an open tab's URL (the live
+    // tab wins) so the same address never shows as both a tab and history.
+    const tabs = [];
+    const tabKeys = new Set();
+    const others = [];
 
     for (const item of results) {
       if (item.type === 'search') {
         continue;
       }
+      if (item.type === 'tab') {
+        tabs.push(item);
+        tabKeys.add(getDedupeKey(item));
+      } else {
+        others.push(item);
+      }
+    }
 
+    const bestByUrl = new Map();
+    for (const item of others) {
       const key = getDedupeKey(item);
-      const existing = bestByUrl.get(key);
+      if (tabKeys.has(key)) {
+        continue;
+      }
 
+      const existing = bestByUrl.get(key);
       if (!existing || compareCandidates(item, existing, query, tierCache) < 0) {
         bestByUrl.set(key, item);
       }
     }
 
-    return Array.from(bestByUrl.values());
+    return [...tabs, ...bestByUrl.values()];
   }
 
   function sortResults(results, query, tierCache) {

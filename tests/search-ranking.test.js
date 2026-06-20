@@ -98,6 +98,42 @@ test('dedupe keeps the highest priority source for the same URL', () => {
   assert.equal(githubResults[0].type, 'tab');
 });
 
+test('open tabs with the same URL are never merged; a non-tab duplicate is dropped', () => {
+  const results = rankResults([
+    {
+      type: 'tab',
+      id: 17,
+      title: 'GitHub - Home (window 1)',
+      url: 'https://github.com/',
+      lastAccessed: 1000
+    },
+    {
+      type: 'tab',
+      id: 42,
+      title: 'GitHub - Home (window 2)',
+      url: 'https://github.com/',
+      lastAccessed: 900
+    },
+    {
+      type: 'history',
+      id: 'history:1',
+      title: 'GitHub',
+      url: 'https://github.com/',
+      typedCount: 4,
+      visitCount: 10,
+      lastVisitTime: 200
+    }
+  ], 'git', 10);
+
+  const items = results.filter((item) => item.type !== 'search');
+  const tabIds = items.filter((item) => item.type === 'tab').map((item) => item.id);
+  // both open tabs survive — N open tabs of one URL are N switchable results
+  assert.equal(tabIds.length, 2);
+  assert.ok(tabIds.includes(17) && tabIds.includes(42));
+  // the history entry duplicating an open tab's URL is still dropped
+  assert.equal(items.some((item) => item.type === 'history'), false);
+});
+
 test('missing urls do not collapse unrelated records during dedupe', () => {
   const results = rankResults([
     {
