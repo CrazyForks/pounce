@@ -27,6 +27,22 @@
     "message": "搜索标签页与书签",
     "description": "Primary search button label in popup (both has-URLs and empty states)"
   },
+  "popup_searchSources": {
+    "message": "标签页 · 书签 · 历史 · 常用网站",
+    "description": "Sub-label under the primary search button listing searched sources"
+  },
+  "popup_chipTabs": {
+    "message": "标签页",
+    "description": "Unit label after the open-tab count chip in the popup"
+  },
+  "popup_chipSaved": {
+    "message": "书签",
+    "description": "Unit label after the saved-bookmark count chip in the popup"
+  },
+  "popup_chipRecent": {
+    "message": "最近",
+    "description": "Unit label after the recent-history count chip in the popup"
+  },
   "popup_batchOpenURLs": {
     "message": "批量打开 URL",
     "description": "Batch open button label and section title in popup"

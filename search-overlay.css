@@ -3,55 +3,103 @@
 /* CSS 变量定义在 .pounce-search-overlay 上（而不是 :root），
    因为在 Shadow DOM 里 :root 不匹配任何东西；变量随 overlay 元素继承给后代。 */
 
+/* ── Pounce design tokens — one green, dark-first. Light + dark. ──
+   Canonical --pn-* names map the design system (design/pounce-kit.jsx);
+   legacy aliases below keep existing rules working without churn. */
+
 /* Light Theme - 亮色主题 */
 .pn-theme-light {
-  --pn-background: #ffffff;
-  --pn-foreground: oklch(0.145 0 0);
-  --pn-card: #ffffff;
-  --pn-card-foreground: oklch(0.145 0 0);
-  --pn-primary: oklch(0.525 0.181 252.88);
-  --pn-primary-foreground: oklch(0.98 0 0);
-  --pn-secondary: oklch(0.95 0.0058 264.53);
-  --pn-secondary-foreground: oklch(0.525 0.181 252.88);
-  --pn-muted: oklch(0.96 0.008 252.88);
-  --pn-muted-foreground: oklch(0.45 0.025 252.88);
-  --pn-accent: oklch(0.925 0.025 252.88);
-  --pn-accent-foreground: oklch(0.525 0.181 252.88);
-  --pn-border: oklch(0.9 0.01 252.88);
-  --pn-input: #ffffff;
-  --pn-input-background: #f8f9fa;
-  --pn-ring: oklch(0.525 0.181 252.88);
-  --pn-shadow: rgba(0, 0, 0, 0.1);
-  --pn-shadow-strong: rgba(0, 0, 0, 0.25);
-  --pn-overlay-bg: rgba(0, 0, 0, 0.4);
+  --pn-bg: #e9eae7;
+  --pn-surface: #ffffff;
+  --pn-surface-grad: #ffffff;
+  --pn-elevated: #f6f7f5;
+  --pn-fg: #15181a;
+  --pn-text-muted: #6b716e;
+  --pn-faint: #9aa09c;
+  --pn-line: rgba(20, 28, 22, 0.10);
+  --pn-line-strong: rgba(20, 28, 22, 0.16);
+  --pn-hover: rgba(20, 28, 22, 0.04);
+  --pn-green: #159a45;
+  --pn-green-soft: rgba(21, 154, 69, 0.12);
+  --pn-sel: rgba(21, 154, 69, 0.10);
+  --pn-sel-border: rgba(21, 154, 69, 0.28);
+  --pn-accent-fg: #ffffff;
+  --pn-kbd: #f1f2ef;
+  --pn-kbd-border: rgba(20, 28, 22, 0.14);
+  --pn-footer: #f1f2ef;
+  --pn-scrim: rgba(20, 24, 20, 0.30);
+
+  /* legacy aliases → repointed to the new palette */
+  --pn-background: var(--pn-bg);
+  --pn-foreground: var(--pn-fg);
+  --pn-card: var(--pn-surface);
+  --pn-card-foreground: var(--pn-fg);
+  --pn-primary: var(--pn-green);
+  --pn-primary-foreground: var(--pn-accent-fg);
+  --pn-secondary: var(--pn-elevated);
+  --pn-secondary-foreground: var(--pn-fg);
+  --pn-muted: var(--pn-elevated);
+  --pn-muted-foreground: var(--pn-text-muted);
+  --pn-accent: var(--pn-hover);
+  --pn-accent-foreground: var(--pn-green);
+  --pn-border: var(--pn-line);
+  --pn-input: var(--pn-elevated);
+  --pn-input-background: var(--pn-elevated);
+  --pn-ring: var(--pn-green);
+  --pn-shadow: rgba(20, 28, 22, 0.10);
+  --pn-shadow-strong: rgba(20, 28, 22, 0.18);
+  --pn-overlay-bg: var(--pn-scrim);
 }
 
 /* Dark Theme - 暗色主题 */
 .pn-theme-dark {
-  --pn-background: oklch(0.08 0.015 252.88);
-  --pn-foreground: oklch(0.96 0.015 252.88);
-  --pn-card: oklch(0.1 0.02 252.88);
-  --pn-card-foreground: oklch(0.96 0.015 252.88);
-  --pn-primary: oklch(0.525 0.181 252.88);
-  --pn-primary-foreground: oklch(0.98 0 0);
-  --pn-secondary: oklch(0.15 0.02 252.88);
-  --pn-secondary-foreground: oklch(0.96 0.015 252.88);
-  --pn-muted: oklch(0.15 0.02 252.88);
-  --pn-muted-foreground: oklch(0.65 0.02 252.88);
-  --pn-accent: oklch(0.15 0.02 252.88);
-  --pn-accent-foreground: oklch(0.96 0.015 252.88);
-  --pn-border: oklch(0.2 0.02 252.88);
-  --pn-input: oklch(0.15 0.02 252.88);
-  --pn-input-background: oklch(0.12 0.02 252.88);
-  --pn-ring: oklch(0.525 0.181 252.88);
-  --pn-shadow: rgba(0, 0, 0, 0.3);
+  --pn-bg: #0b0c0d;
+  --pn-surface: #161718;
+  --pn-surface-grad: linear-gradient(168deg, #1b1d1e 0%, #161718 100%);
+  --pn-elevated: #202223;
+  --pn-fg: #f3f4f3;
+  --pn-text-muted: #8b8f8d;
+  --pn-faint: #5e6361;
+  --pn-line: rgba(255, 255, 255, 0.08);
+  --pn-line-strong: rgba(255, 255, 255, 0.14);
+  --pn-hover: rgba(255, 255, 255, 0.05);
+  --pn-green: #34d058;
+  --pn-green-soft: rgba(52, 208, 88, 0.16);
+  --pn-sel: rgba(52, 208, 88, 0.13);
+  --pn-sel-border: rgba(52, 208, 88, 0.30);
+  --pn-accent-fg: #06140a;
+  --pn-kbd: #202223;
+  --pn-kbd-border: rgba(255, 255, 255, 0.12);
+  --pn-footer: #0e0f10;
+  --pn-scrim: rgba(6, 7, 8, 0.62);
+
+  /* legacy aliases → repointed to the new palette */
+  --pn-background: var(--pn-bg);
+  --pn-foreground: var(--pn-fg);
+  --pn-card: var(--pn-surface);
+  --pn-card-foreground: var(--pn-fg);
+  --pn-primary: var(--pn-green);
+  --pn-primary-foreground: var(--pn-accent-fg);
+  --pn-secondary: var(--pn-elevated);
+  --pn-secondary-foreground: var(--pn-fg);
+  --pn-muted: var(--pn-elevated);
+  --pn-muted-foreground: var(--pn-text-muted);
+  --pn-accent: var(--pn-hover);
+  --pn-accent-foreground: var(--pn-green);
+  --pn-border: var(--pn-line);
+  --pn-input: var(--pn-elevated);
+  --pn-input-background: var(--pn-elevated);
+  --pn-ring: var(--pn-green);
+  --pn-shadow: rgba(0, 0, 0, 0.4);
   --pn-shadow-strong: rgba(0, 0, 0, 0.6);
-  --pn-overlay-bg: rgba(0, 0, 0, 0.7);
+  --pn-overlay-bg: var(--pn-scrim);
 }
 
 /* Overlay container - covers entire viewport */
 .pounce-search-overlay {
-  --pn-radius: 14px; /* px, not rem — Shadow DOM doesn't isolate rem from host's <html> font-size (e.g. Baidu sets it to 100px) */
+  --pn-radius: 16px; /* px, not rem — Shadow DOM doesn't isolate rem from host's <html> font-size (e.g. Baidu sets it to 100px) */
+  --pn-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --pn-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   position: fixed;
   top: 0;
   left: 0;
@@ -65,17 +113,17 @@
   justify-content: center;
   align-items: flex-start;
   padding-top: 12vh;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--pn-sans);
 }
 
 /* Search container */
 .pounce-search-container {
   width: 640px;
   max-width: 90vw;
-  background: var(--pn-card);
-  border: 1px solid var(--pn-border);
+  background: var(--pn-surface-grad);
+  border: 1px solid var(--pn-line-strong);
   border-radius: var(--pn-radius);
-  box-shadow: 
+  box-shadow:
     0 4px 20px var(--pn-shadow),
     0 16px 64px var(--pn-shadow-strong);
   overflow: hidden;
@@ -190,9 +238,9 @@
 }
 
 .pounce-search-result.selected {
-  background-color: var(--pn-accent);
-  border-color: transparent;
-  box-shadow: inset 3px 0 0 var(--pn-primary);
+  background-color: var(--pn-sel);
+  border-color: var(--pn-sel-border);
+  box-shadow: inset 2.5px 0 0 var(--pn-green);
 }
 
 .pounce-search-result:last-child {
@@ -203,18 +251,20 @@
 .pounce-result-number {
   min-width: 16px;
   flex-shrink: 0;
+  font-family: var(--pn-mono);
   font-size: 11px;
   font-weight: 500;
-  color: var(--pn-muted-foreground);
+  color: var(--pn-faint);
   text-align: right;
   padding-right: 4px;
-  opacity: 0.45;
+  opacity: 0.7;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
 .pounce-search-result.selected .pounce-result-number {
-  opacity: 0.7;
+  color: var(--pn-green);
+  opacity: 0.9;
 }
 
 .pounce-quick-pick-disabled .pounce-result-number {
@@ -291,10 +341,11 @@
 }
 
 .pounce-result-url {
-  font-size: 12px;
-  color: var(--pn-muted-foreground);
+  font-family: var(--pn-mono);
+  font-size: 11.5px;
+  color: var(--pn-text-muted);
   margin: 0;
-  line-height: 1.2;
+  line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -414,9 +465,9 @@
   justify-content: space-between;
   padding: 0 16px;
   border-top: 1px solid var(--pn-border);
-  background: var(--pn-muted);
+  background: var(--pn-footer);
   font-size: 11px;
-  color: var(--pn-muted-foreground);
+  color: var(--pn-text-muted);
   gap: 12px;
 }
 
@@ -429,6 +480,7 @@
 
 .pounce-results-counter {
   white-space: nowrap;
+  font-family: var(--pn-mono);
 }
 
 .pounce-results-limit-select {
@@ -469,13 +521,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--pn-card);
-  border: 1px solid var(--pn-border);
-  border-radius: 4px;
+  background: var(--pn-kbd);
+  border: 1px solid var(--pn-kbd-border);
+  border-radius: 5px;
   padding: 1px 5px;
+  font-family: var(--pn-mono);
   font-size: 10px;
   font-weight: 500;
-  color: var(--pn-muted-foreground);
+  color: var(--pn-text-muted);
   min-width: 18px;
   line-height: 1.5;
 }
@@ -638,13 +691,21 @@
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   .pounce-search-overlay {
-    --pn-primary: #0000FF;
-    --pn-card: #FFFFFF;
-    --pn-foreground: #000000;
-    --pn-muted: #F0F0F0;
-    --pn-muted-foreground: #000000;
-    --pn-accent: #E0E0FF;
-    --pn-border: #000000;
+    --pn-green: #007a33;
+    --pn-green-soft: #c7f5d2;
+    --pn-sel: #dff5e5;
+    --pn-sel-border: #007a33;
+    --pn-surface: #ffffff;
+    --pn-surface-grad: #ffffff;
+    --pn-elevated: #f0f0f0;
+    --pn-footer: #f0f0f0;
+    --pn-fg: #000000;
+    --pn-text-muted: #000000;
+    --pn-faint: #000000;
+    --pn-line: #000000;
+    --pn-line-strong: #000000;
+    --pn-kbd: #ffffff;
+    --pn-kbd-border: #000000;
     --pn-shadow: rgba(0, 0, 0, 0.5);
     --pn-shadow-strong: rgba(0, 0, 0, 0.8);
   }
@@ -667,13 +728,21 @@
 /* Dark theme high contrast */
 @media (prefers-color-scheme: dark) and (prefers-contrast: high) {
   .pounce-search-overlay {
-    --pn-primary: #66B3FF;
-    --pn-card: #000000;
-    --pn-foreground: #FFFFFF;
-    --pn-muted: #1A1A1A;
-    --pn-muted-foreground: #FFFFFF;
-    --pn-accent: #003366;
-    --pn-border: #FFFFFF;
+    --pn-green: #5be27d;
+    --pn-green-soft: rgba(91, 226, 125, 0.20);
+    --pn-sel: rgba(91, 226, 125, 0.22);
+    --pn-sel-border: #5be27d;
+    --pn-surface: #000000;
+    --pn-surface-grad: #000000;
+    --pn-elevated: #1a1a1a;
+    --pn-footer: #000000;
+    --pn-fg: #ffffff;
+    --pn-text-muted: #ffffff;
+    --pn-faint: #ffffff;
+    --pn-line: #ffffff;
+    --pn-line-strong: #ffffff;
+    --pn-kbd: #1a1a1a;
+    --pn-kbd-border: #ffffff;
   }
 }
 
@@ -729,37 +798,8 @@
   contain: layout style paint;
 }
 
-/* Dark mode — stronger selected & icon contrast */
-.pn-theme-dark .pounce-search-result.selected {
-  background-color: oklch(0.19 0.03 252.88);
-  box-shadow: inset 3px 0 0 var(--pn-primary);
-}
-
-.pn-theme-dark.pn-mouse-active .pounce-search-result:hover {
-  background-color: oklch(0.16 0.025 252.88);
-}
-
-.pn-theme-dark .pounce-result-icon.tab:not(:has(img)),
-.pn-theme-dark .pounce-result-icon.bookmark:not(:has(img)),
-.pn-theme-dark .pounce-result-icon.history:not(:has(img)),
-.pn-theme-dark .pounce-result-icon.topSite:not(:has(img)) {
-  background-color: oklch(0.26 0.03 252.88);
-  color: oklch(0.72 0.02 252.88);
-}
-
-/* Dark mode — subtle depth gradient on container */
-.pn-theme-dark .pounce-search-container {
-  background: linear-gradient(
-    170deg,
-    oklch(0.13 0.025 252.88) 0%,
-    oklch(0.09 0.015 252.88) 100%
-  );
-  border-color: oklch(0.22 0.025 252.88);
-}
-
-.pn-theme-dark .pounce-search-bottom {
-  background: oklch(0.08 0.015 252.88);
-}
+/* Dark-mode look is now fully token-driven (--pn-surface-grad, --pn-sel,
+   --pn-footer, --pn-elevated). No per-theme literal overrides needed. */
 
 /* Bookmark badge styles */
 .pounce-bookmark-badge {
@@ -822,6 +862,6 @@
 /* Highlighted query matches inside result title / URL */
 .pounce-result-title .pounce-highlight,
 .pounce-result-url .pounce-highlight {
-  font-weight: 600;
-  color: var(--pn-primary);
+  font-weight: 700;
+  color: var(--pn-green);
 }

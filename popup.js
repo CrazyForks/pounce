@@ -117,6 +117,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('Failed to set version:', error);
   }
 
+  // 填充来源 chips 的计数（打开标签页 / 书签 / 最近历史），只读、失败时静默保持 0
+  const setChipCount = (id, n) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = `${n}`;
+  };
+  (async () => {
+    try {
+      if (chrome.tabs?.query) {
+        const tabs = await chrome.tabs.query({});
+        setChipCount('tabsCount', tabs.length);
+      }
+    } catch (e) { /* 忽略：chip 仅作概览 */ }
+    try {
+      if (chrome.bookmarks?.search) {
+        const marks = await chrome.bookmarks.search({});
+        setChipCount('savedCount', marks.filter(m => m.url).length);
+      }
+    } catch (e) { /* 忽略 */ }
+    try {
+      if (chrome.history?.search) {
+        const recent = await chrome.history.search({ text: '', maxResults: 100, startTime: 0 });
+        setChipCount('recentCount', recent.length);
+      }
+    } catch (e) { /* 忽略 */ }
+  })();
+
   try {
     // 从存储中获取 URL 列表
     const result = await chrome.storage.sync.get(['urls']);

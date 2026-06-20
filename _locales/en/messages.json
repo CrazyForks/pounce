@@ -27,6 +27,22 @@
     "message": "Search Tabs & Bookmarks",
     "description": "Primary search button label in popup (both has-URLs and empty states)"
   },
+  "popup_searchSources": {
+    "message": "tabs · bookmarks · history · top sites",
+    "description": "Sub-label under the primary search button listing searched sources"
+  },
+  "popup_chipTabs": {
+    "message": "tabs",
+    "description": "Unit label after the open-tab count chip in the popup"
+  },
+  "popup_chipSaved": {
+    "message": "saved",
+    "description": "Unit label after the saved-bookmark count chip in the popup"
+  },
+  "popup_chipRecent": {
+    "message": "recent",
+    "description": "Unit label after the recent-history count chip in the popup"
+  },
   "popup_batchOpenURLs": {
     "message": "Batch Open URLs",
     "description": "Batch open button label and section title in popup"

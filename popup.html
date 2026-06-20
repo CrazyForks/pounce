@@ -3,41 +3,67 @@
 <head>
   <meta charset="utf-8">
   <style>
+    /* Light theme (default) */
     :root {
-      --bg: #ffffff;
-      --fg: #111111;
-      --muted: #888888;
-      --border: #e8e8e8;
-      --primary: #1a6ef5;
+      --bg: #e9eae7;
+      --surface: #ffffff;
+      --elevated: #f6f7f5;
+      --fg: #15181a;
+      --muted: #6b716e;
+      --faint: #9aa09c;
+      --border: rgba(20,28,22,0.10);
+      --border-strong: rgba(20,28,22,0.16);
+      --hover-bg: rgba(20,28,22,0.04);
+      --primary: #159A45;
       --primary-fg: #ffffff;
-      --hover-bg: #f5f5f5;
-      --badge-bg: rgba(26,110,245,0.08);
-      --badge-fg: #1a6ef5;
+      --accent-fg: #ffffff;
+      --green-soft: rgba(21,154,69,0.12);
+      --kbd: #f1f2ef;
+      --kbd-border: rgba(20,28,22,0.14);
+      --badge-bg: rgba(21,154,69,0.12);
+      --badge-fg: #159A45;
+      --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     }
 
     [data-theme="dark"] {
-      --bg: #141414;
-      --fg: #efefef;
-      --muted: #666666;
-      --border: #2a2a2a;
-      --primary: #3b82f6;
-      --primary-fg: #ffffff;
-      --hover-bg: #1e1e1e;
-      --badge-bg: rgba(59,130,246,0.12);
-      --badge-fg: #3b82f6;
+      --bg: #0b0c0d;
+      --surface: #161718;
+      --elevated: #202223;
+      --fg: #f3f4f3;
+      --muted: #8b8f8d;
+      --faint: #5e6361;
+      --border: rgba(255,255,255,0.08);
+      --border-strong: rgba(255,255,255,0.14);
+      --hover-bg: rgba(255,255,255,0.05);
+      --primary: #34D058;
+      --primary-fg: #06140a;
+      --accent-fg: #06140a;
+      --green-soft: rgba(52,208,88,0.16);
+      --kbd: #202223;
+      --kbd-border: rgba(255,255,255,0.12);
+      --badge-bg: rgba(52,208,88,0.16);
+      --badge-fg: #34D058;
     }
 
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme="light"]) {
-        --bg: #141414;
-        --fg: #efefef;
-        --muted: #666666;
-        --border: #2a2a2a;
-        --primary: #3b82f6;
-        --primary-fg: #ffffff;
-        --hover-bg: #1e1e1e;
-        --badge-bg: rgba(59,130,246,0.12);
-        --badge-fg: #3b82f6;
+        --bg: #0b0c0d;
+        --surface: #161718;
+        --elevated: #202223;
+        --fg: #f3f4f3;
+        --muted: #8b8f8d;
+        --faint: #5e6361;
+        --border: rgba(255,255,255,0.08);
+        --border-strong: rgba(255,255,255,0.14);
+        --hover-bg: rgba(255,255,255,0.05);
+        --primary: #34D058;
+        --primary-fg: #06140a;
+        --accent-fg: #06140a;
+        --green-soft: rgba(52,208,88,0.16);
+        --kbd: #202223;
+        --kbd-border: rgba(255,255,255,0.12);
+        --badge-bg: rgba(52,208,88,0.16);
+        --badge-fg: #34D058;
       }
     }
 
@@ -45,9 +71,9 @@
 
     body {
       width: 300px;
-      background: var(--bg);
+      background: var(--surface);
       color: var(--fg);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       font-size: 13px;
       -webkit-font-smoothing: antialiased;
     }
@@ -57,25 +83,38 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 16px 0;
+      padding: 15px 16px 0;
     }
 
     .header-left {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 9px;
+    }
+
+    .logo-tile {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      background: #0e0f10;
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
 
     .logo {
       width: 20px;
       height: 20px;
       border-radius: 5px;
+      display: block;
     }
 
     .app-name {
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: -0.01em;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
     }
 
     .settings-btn {
@@ -83,10 +122,12 @@
       border: none;
       cursor: pointer;
       color: var(--muted);
-      padding: 4px;
-      border-radius: 6px;
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
       display: flex;
       align-items: center;
+      justify-content: center;
       transition: background 0.15s, color 0.15s;
     }
 
@@ -107,14 +148,13 @@
       border: none;
       cursor: pointer;
       color: var(--muted);
-      padding: 4px;
-      border-radius: 6px;
+      border-radius: 7px;
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
-      width: 23px;
-      height: 23px;
+      width: 28px;
+      height: 28px;
       transition: background 0.15s, color 0.15s;
     }
 
@@ -138,53 +178,67 @@
       transform: scale(1) rotate(0deg);
     }
 
-    /* Search button */
+    /* Search button (primary green action) */
     .search-btn {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 12px;
       width: calc(100% - 32px);
-      margin: 12px 16px 0;
-      padding: 10px 14px;
+      margin: 14px 16px 0;
+      padding: 13px 15px;
       background: var(--primary);
-      color: var(--primary-fg);
+      color: var(--accent-fg);
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      transition: opacity 0.15s;
+      text-align: left;
+      transition: filter 0.15s;
     }
 
-    .search-btn:hover { opacity: 0.9; }
+    .search-btn:hover { filter: brightness(1.05); }
 
-    .search-btn-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .search-btn-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .search-btn-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .search-btn-sub {
+      font-size: 11px;
+      opacity: 0.72;
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .kbd-hint {
-      font-size: 11px;
-      opacity: 0.65;
-      background: rgba(255,255,255,0.18);
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(0,0,0,0.16);
       border-radius: 5px;
-      padding: 2px 7px;
+      padding: 2px 6px;
       letter-spacing: 0.01em;
+      flex-shrink: 0;
     }
 
-    /* Batch button */
+    /* Batch button (ghost) */
     .batch-btn {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 11px;
       width: calc(100% - 32px);
-      margin: 7px 16px 0;
-      padding: 9px 14px;
+      margin: 8px 16px 0;
+      padding: 11px 15px;
       background: none;
       color: var(--fg);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 11px;
       cursor: pointer;
       font-size: 13px;
       transition: background 0.15s;
@@ -192,34 +246,61 @@
 
     .batch-btn:hover { background: var(--hover-bg); }
 
-    .batch-btn-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--fg);
-    }
-
     .batch-icon {
       color: var(--muted);
+      display: flex;
     }
 
-    .count-badge {
-      font-size: 11px;
-      color: var(--badge-fg);
-      background: var(--badge-bg);
-      border-radius: 5px;
-      padding: 2px 7px;
+    .batch-label {
+      flex: 1;
+      text-align: left;
+      font-size: 13px;
       font-weight: 500;
     }
 
+    .count-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--badge-fg);
+      background: var(--badge-bg);
+      border-radius: 6px;
+      padding: 2px 7px;
+      flex-shrink: 0;
+    }
+
+    /* Source chips */
+    .chips {
+      display: flex;
+      gap: 6px;
+      padding: 12px 16px 0;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .chip svg { flex-shrink: 0; }
+    .chip .chip-num { font-family: var(--mono); }
+
     /* Empty hint */
     .empty-hint {
-      margin: 7px 16px 0;
-      padding: 9px 14px;
+      margin: 8px 16px 0;
+      padding: 11px 15px;
       font-size: 12px;
       color: var(--muted);
-      border: 1px dashed var(--border);
-      border-radius: 10px;
+      border: 1px dashed var(--border-strong);
+      border-radius: 11px;
       cursor: pointer;
       transition: background 0.15s, color 0.15s, border-color 0.15s;
       text-align: center;
@@ -236,14 +317,15 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 16px 13px;
-      margin-top: 12px;
+      padding: 12px 16px 14px;
+      margin-top: 14px;
       border-top: 1px solid var(--border);
     }
 
     .version {
+      font-family: var(--mono);
       font-size: 11px;
-      color: var(--muted);
+      color: var(--faint);
     }
 
     .shortcut-hint {
@@ -251,17 +333,30 @@
       color: var(--muted);
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
     }
 
     .shortcut-hint kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 19px;
+      padding: 0 5px;
       font-family: inherit;
-      font-size: 10px;
-      background: var(--hover-bg);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 1px 5px;
-      color: var(--fg);
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1;
+      background: var(--kbd);
+      border: 1px solid var(--kbd-border);
+      border-radius: 5px;
+      color: var(--muted);
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .github-link {
@@ -281,12 +376,6 @@
       color: var(--fg);
     }
 
-    .footer-links {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
     #loading {
       padding: 20px 16px;
       color: var(--muted);
@@ -298,14 +387,16 @@
   <!-- Header -->
   <div class="header">
     <div class="header-left">
-      <img class="logo" src="icons/icon128.png" alt="">
+      <span class="logo-tile">
+        <img class="logo" src="icons/icon128.png" alt="">
+      </span>
       <span class="app-name">Pounce</span>
     </div>
     <div class="header-right">
       <button class="theme-btn" id="themeToggle" data-i18n-title="popup_themeTitle" title="Auto (System)">
         <!-- Sun: light mode -->
         <span class="t-icon t-sun">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5"/>
             <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
             <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
@@ -315,13 +406,13 @@
         </span>
         <!-- Moon: dark mode -->
         <span class="t-icon t-moon">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
           </svg>
         </span>
         <!-- Half-circle: auto/system -->
         <span class="t-icon t-auto">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="9"/>
             <path d="M12 3a9 9 0 0 0 0 18V3z" fill="currentColor" stroke="none"/>
           </svg>
@@ -342,36 +433,60 @@
   <!-- Has URLs state -->
   <div id="hasUrls" style="display:none;">
     <button class="search-btn" id="searchBtn">
-      <div class="search-btn-left">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-        </svg>
-        <span data-i18n="popup_searchTabsBookmarks">Search Tabs & Bookmarks</span>
-      </div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <span class="search-btn-text">
+        <span class="search-btn-title" data-i18n="popup_searchTabsBookmarks">Search Tabs &amp; Bookmarks</span>
+        <span class="search-btn-sub" data-i18n="popup_searchSources">tabs · bookmarks · history · top sites</span>
+      </span>
       <span class="kbd-hint">⌘K</span>
     </button>
 
     <button class="batch-btn" id="openAllBtn">
-      <div class="batch-btn-left">
-        <svg class="batch-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <span class="batch-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
           <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
         </svg>
-        <span class="batch-label" data-i18n="popup_batchOpenURLs">Batch Open URLs</span>
-      </div>
+      </span>
+      <span class="batch-label" data-i18n="popup_batchOpenURLs">Batch Open URLs</span>
       <span class="count-badge" id="urlCount"></span>
     </button>
+
+    <!-- Source chips -->
+    <div class="chips">
+      <span class="chip">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z"/><path d="M3 8h18"/>
+        </svg>
+        <span class="chip-num" id="tabsCount">0</span> <span data-i18n="popup_chipTabs">tabs</span>
+      </span>
+      <span class="chip">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1Z"/>
+        </svg>
+        <span class="chip-num" id="savedCount">0</span> <span data-i18n="popup_chipSaved">saved</span>
+      </span>
+      <span class="chip">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 3v5h5"/><path d="M3.05 13a9 9 0 1 0 2.6-6.36L3 8"/><path d="M12 7v5l4 2"/>
+        </svg>
+        <span class="chip-num" id="recentCount">0</span> <span data-i18n="popup_chipRecent">recent</span>
+      </span>
+    </div>
   </div>
 
   <!-- Empty state -->
   <div id="emptyState" style="display:none;">
     <button class="search-btn" id="searchBtnEmpty">
-      <div class="search-btn-left">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-        </svg>
-        <span data-i18n="popup_searchTabsBookmarks">Search Tabs & Bookmarks</span>
-      </div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <span class="search-btn-text">
+        <span class="search-btn-title" data-i18n="popup_searchTabsBookmarks">Search Tabs &amp; Bookmarks</span>
+        <span class="search-btn-sub" data-i18n="popup_searchSources">tabs · bookmarks · history · top sites</span>
+      </span>
       <span class="kbd-hint">⌘K</span>
     </button>
 
