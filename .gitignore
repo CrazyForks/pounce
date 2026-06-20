@@ -33,3 +33,9 @@ npm-debug.log*
 notes/
 .superpowers/
 .claude/
+
+# Local tool caches (Claude Code / Codex usage metadata) — never ship
+cc-oauth-usage.json
+
+# Imported design system + local preview (reference only) — never ship
+design/
