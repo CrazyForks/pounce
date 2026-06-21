@@ -2,6 +2,9 @@
 
 🌐 **English** · [中文](CHANGELOG.zh-CN.md)
 
+### 1.6.1
+- Fix: in 1.6.0 the ⌘K search overlay wouldn't open on normal pages — the package was missing a script the overlay loads. Updating to 1.6.1 restores it.
+
 ### 1.6.0
 - A dark-first redesign of the whole extension: the ⌘K overlay, the toolbar popup and Settings now share one calm design built around a single green accent (the old overlay blue is retired), in both dark and light — following your system theme by default.
 - New experimental **Tab grouping** (opt-in in Settings): when a site has several open tabs, they collapse into a single row in the overlay with a tab count. Press ↵ to expand it into a tray and switch to any tab, or close the whole group at once.
