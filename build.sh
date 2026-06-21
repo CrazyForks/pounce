@@ -22,6 +22,7 @@ FILES=(
   search-overlay.js
   search-overlay.css
   search-ranking.js
+  tab-grouping.js
   pinyin-index.js
   pinyin-matcher.js
   vendor
