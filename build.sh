@@ -37,6 +37,25 @@ for f in "${FILES[@]}"; do
   fi
 done
 
+# Guard: every file injected via chrome.scripting.executeScript in background.js
+# must be in FILES, or the packaged build will fail at runtime with
+# "Could not load file" (this is what broke ⌘K in 1.6.0).
+python3 - "${FILES[@]}" <<'PYEOF'
+import re, sys
+packaged = set(sys.argv[1:])
+src = open('background.js').read()
+injected = set()
+for block in re.findall(r'files:\s*\[(.*?)\]', src, re.DOTALL):
+    injected |= set(re.findall(r"""['"]([^'"]+\.(?:js|css))['"]""", block))
+missing = [p for p in sorted(injected)
+           if p not in packaged and p.split('/')[0] not in packaged]
+if missing:
+    sys.stderr.write("error: background.js injects files missing from build.sh FILES: "
+                     + ", ".join(missing) + "\n        add them to the FILES array.\n")
+    sys.exit(1)
+print(f"inject-coverage check: {len(injected)} injected file(s), all packaged")
+PYEOF
+
 if [[ $# -ge 1 ]]; then
   VERSION="$1"
 else
