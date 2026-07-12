@@ -21,6 +21,61 @@ Pounce requires no package-manager install step and is built with plain HTML, CS
 
 You can preview `popup.html` and `options.html` directly in a browser. The popup includes a mock `chrome` fallback for local previews.
 
+## Debugging an unpacked extension
+
+These steps work for **Chrome** and **Microsoft Edge** (Chromium). No package manager is required.
+
+### Reload after code changes
+
+1. Open the extensions page:
+   - Chrome: `chrome://extensions`
+   - Edge: `edge://extensions`
+2. Ensure **Developer mode** is on.
+3. Find **Pounce** in the list.
+4. Click **Reload** (circular arrow). Prefer a full reload after changes to `manifest.json`, `background.js`, or content-script entry points.
+5. Refresh any open page where you are testing the overlay (`F5` / reload), then trigger search again (`Command+K` or `Alt+K`).
+
+If the extension does not appear, use **Load unpacked** again and select the repository root (the folder that contains `manifest.json`).
+
+### Inspect popup errors
+
+1. Click the Pounce toolbar icon to open the popup.
+2. Right-click inside the popup → **Inspect** (or **Inspect popup**).
+3. Use the **Console** panel for runtime errors and the **Network** panel only if you are debugging asset loads.
+4. Leave the DevTools window open while reproducing the issue so logs are not lost when the popup closes.
+
+### Inspect options page errors
+
+1. Open the options page from the extensions list (**Details → Extension options**) or right-click the toolbar icon → **Options**.
+2. On the options tab, open DevTools (`F12` / `Command+Option+I`).
+3. Check **Console** for errors from `options.js` and related scripts.
+
+### Inspect the background service worker
+
+Pounce uses a Manifest V3 service worker (`background.js`).
+
+1. Open `chrome://extensions` or `edge://extensions`.
+2. Find Pounce → click **service worker** / **Inspect views: service worker** (wording varies slightly by browser version).
+3. Watch the service worker **Console** for message-passing errors, permission failures, and startup exceptions.
+4. Note: Chromium may stop an idle service worker. Trigger a shortcut or popup action, then re-open the inspector if the link disappears.
+
+### Inspect page-overlay errors
+
+The search overlay runs in the context of the **current tab** page.
+
+1. Open a normal `https://` page (not `chrome://`, `edge://`, `chrome-extension://`, or `about:` — the overlay cannot inject there).
+2. Open DevTools on that page (`F12`).
+3. Trigger the overlay (`Command+K` / `Alt+K`).
+4. In **Console**, filter for Pounce-related messages or uncaught exceptions from injected scripts.
+5. If nothing appears, confirm the extension reloaded and that the tab is not a restricted URL.
+
+### Safe reporting
+
+When filing issues or attaching screenshots:
+
+- Do not include private browsing data, credentials, or personal URLs.
+- Prefer redacted console text over full-screen captures of your open tabs.
+
 ## Automated tests
 
 Pounce uses Node.js's built-in test runner and has no npm dependencies:
