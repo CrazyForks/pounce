@@ -63,6 +63,22 @@
 | `scripting` | 在当前页面注入搜索浮层 |
 | `activeTab` | 触发浮层时访问当前标签页 |
 
+## 社区
+
+Pounce 采取审慎维护的方式，以保持快速、注重隐私且功能聚焦。我们欢迎缺陷修复和范围明确的改进。可复现的问题或具体提案请提交到 [Issues](https://github.com/TuYv/pounce/issues)，早期设计问题请在 [Discussions](https://github.com/TuYv/pounce/discussions) 中讨论。
+
+## 参与贡献
+
+请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)，了解本地开发环境、测试、项目约定和 Pull Request 要求。新贡献者可从带有 [`good first issue`](https://github.com/TuYv/pounce/labels/good%20first%20issue) 或 [`help wanted`](https://github.com/TuYv/pounce/labels/help%20wanted) 标签的问题开始。
+
+## 路线图
+
+当前改进方向包括无障碍体验、自动化测试覆盖、多语言质量，以及 Chromium 系浏览器兼容性。这些是方向说明，不代表承诺的发布日期。
+
+## 安全
+
+请按照 [SECURITY.md](SECURITY.md) 私下报告安全漏洞，不要在公开的 Issues 或 Discussions 中披露安全问题。
+
 ## 许可
 
 MIT —— 见 [LICENSE](LICENSE)
