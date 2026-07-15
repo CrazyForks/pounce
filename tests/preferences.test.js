@@ -4,7 +4,9 @@ const assert = require('node:assert/strict');
 const {
   DEFAULT_SEARCH_PREFERENCES,
   ALLOWED_RESULTS_LIMITS,
+  ALLOWED_SEARCH_ENGINES,
   normalizeResultsLimit,
+  normalizeSearchEngine,
   normalizeSearchPreferences
 } = require('../preferences.js');
 
@@ -21,7 +23,8 @@ test('explicit disabled search preferences are preserved', () => {
     quickPickEnabled: false,
     pinyinMatchingEnabled: false,
     tabGroupingEnabled: DEFAULT_SEARCH_PREFERENCES.tabGroupingEnabled,
-    resultsLimit: DEFAULT_SEARCH_PREFERENCES.resultsLimit
+    resultsLimit: DEFAULT_SEARCH_PREFERENCES.resultsLimit,
+    searchEngine: DEFAULT_SEARCH_PREFERENCES.searchEngine
   });
 });
 
@@ -43,6 +46,20 @@ test('resultsLimit accepts only allowed values', () => {
     assert.equal(normalizeResultsLimit(String(value)), value);
     assert.equal(normalizeSearchPreferences({ resultsLimit: value }).resultsLimit, value);
     assert.equal(normalizeSearchPreferences({ resultsLimit: String(value) }).resultsLimit, value);
+  }
+});
+
+test('searchEngine accepts only allowed values, else defaults', () => {
+  for (const id of ALLOWED_SEARCH_ENGINES) {
+    assert.equal(normalizeSearchEngine(id), id);
+    assert.equal(normalizeSearchPreferences({ searchEngine: id }).searchEngine, id);
+  }
+  for (const bad of ['yahoo', '', null, undefined, 42, true]) {
+    assert.equal(normalizeSearchEngine(bad), DEFAULT_SEARCH_PREFERENCES.searchEngine);
+    assert.equal(
+      normalizeSearchPreferences({ searchEngine: bad }).searchEngine,
+      DEFAULT_SEARCH_PREFERENCES.searchEngine
+    );
   }
 });
 

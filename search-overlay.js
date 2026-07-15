@@ -34,19 +34,26 @@
     quickPickEnabled: true,
     pinyinMatchingEnabled: true,
     tabGroupingEnabled: false,
-    resultsLimit: 10
+    resultsLimit: 10,
+    searchEngine: 'default'
   };
   const ALLOWED_RESULTS_LIMITS = PREFERENCES.ALLOWED_RESULTS_LIMITS || [10, 20, 50];
+  const ALLOWED_SEARCH_ENGINES = PREFERENCES.ALLOWED_SEARCH_ENGINES || ['default', 'google', 'bing', 'github', 'linuxdo'];
   const SEARCH_PREFERENCE_KEYS = PREFERENCES.SEARCH_PREFERENCE_KEYS || Object.keys(DEFAULT_SEARCH_PREFERENCES);
   const normalizeResultsLimit = PREFERENCES.normalizeResultsLimit || ((value) => {
     const num = Number(value);
     return ALLOWED_RESULTS_LIMITS.includes(num) ? num : DEFAULT_SEARCH_PREFERENCES.resultsLimit;
+  });
+  const normalizeSearchEngine = PREFERENCES.normalizeSearchEngine || ((value) => {
+    return ALLOWED_SEARCH_ENGINES.includes(value) ? value : DEFAULT_SEARCH_PREFERENCES.searchEngine;
   });
   const normalizeSearchPreferences = PREFERENCES.normalizeSearchPreferences || ((values) => {
     const source = values && typeof values === 'object' ? values : {};
     return SEARCH_PREFERENCE_KEYS.reduce((preferences, key) => {
       if (key === 'resultsLimit') {
         preferences[key] = normalizeResultsLimit(source[key]);
+      } else if (key === 'searchEngine') {
+        preferences[key] = normalizeSearchEngine(source[key]);
       } else {
         preferences[key] = typeof source[key] === 'boolean'
           ? source[key]
@@ -56,10 +63,49 @@
     }, {});
   });
 
+  // 引擎图标(内联 SVG,不依赖本地 favicon 缓存,任意站点都能显示)。
+  // github/bing 用 currentColor 单色跟随主题;linuxdo 为自带浅底的彩色 logo。
+  const ENGINE_ICON_GITHUB = '<svg viewBox="0 0 32 32" width="18" height="18" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M16 0C7.16 0 0 7.16 0 16C0 23.08 4.58 29.06 10.94 31.18C11.74 31.32 12.04 30.84 12.04 30.42C12.04 30.04 12.02 28.78 12.02 27.44C8 28.18 6.96 26.46 6.64 25.56C6.46 25.1 5.68 23.68 5 23.3C4.44 23 3.64 22.26 4.98 22.24C6.24 22.22 7.14 23.4 7.44 23.88C8.88 26.3 11.18 25.62 12.1 25.2C12.24 24.16 12.66 23.46 13.12 23.06C9.56 22.66 5.84 21.28 5.84 15.16C5.84 13.42 6.46 11.98 7.48 10.86C7.32 10.46 6.76 8.82 7.64 6.62C7.64 6.62 8.98 6.2 12.04 8.26C13.32 7.9 14.68 7.72 16.04 7.72C17.4 7.72 18.76 7.9 20.04 8.26C23.1 6.18 24.44 6.62 24.44 6.62C25.32 8.82 24.76 10.46 24.6 10.86C25.62 11.98 26.24 13.4 26.24 15.16C26.24 21.3 22.5 22.66 18.94 23.06C19.52 23.56 20.02 24.52 20.02 26.02C20.02 28.16 20 29.88 20 30.42C20 30.84 20.3 31.34 21.1 31.18C27.42 29.06 32 23.06 32 16C32 7.16 24.84 0 16 0V0Z"/></svg>';
+  const ENGINE_ICON_BING = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M20.176 15.406a6.48 6.48 0 01-1.736 4.414c1.338-1.47.803-3.869-1.003-4.635-.862-.305-2.488-.85-3.367-1.158a1.834 1.834 0 01-.932-.818c-.381-.975-1.163-2.968-1.548-3.948-.095-.285-.31-.625-.265-.938.046-.598.724-1.003 1.276-.754l3.682 1.888c.621.292 1.305.692 1.796 1.172a6.486 6.486 0 012.097 4.777zm-1.44 1.888c-.264-1.194-1.135-1.744-2.216-2.028-1.527.902-4.853 2.878-6.952 4.13-1.103.68-2.13 1.35-2.919 1.242a2.866 2.866 0 01-2.77-2.325c-.012-.048-.008-.03-.001.01a6.4 6.4 0 00.947 2.653 6.498 6.498 0 005.486 3.022c1.908.062 3.536-1.153 5.099-2.096.292-.188.804-.496 1.332-.831l1.423-1.51c.553-.577.764-1.426.571-2.267zm-12.04 2.97c.422 0 .822-.1 1.173-.29.355-.215.964-.579 1.7-1.018L9.57 4.502c0-.99-.497-1.864-1.257-2.382-.08-.059-2.91-1.901-2.99-1.956-.605-.432-1.523.045-1.5.797v14.887l.417 2.36a2.488 2.488 0 002.455 2.056z"/></svg>';
+  const ENGINE_ICON_LINUXDO = '<svg viewBox="0 0 120 120" width="18" height="18" aria-hidden="true"><clipPath id="pounce-ld-clip"><circle cx="60" cy="60" r="47"/></clipPath><circle fill="#f0f0f0" cx="60" cy="60" r="50"/><rect fill="#1c1c1e" clip-path="url(#pounce-ld-clip)" x="10" y="10" width="100" height="30"/><rect fill="#f0f0f0" clip-path="url(#pounce-ld-clip)" x="10" y="40" width="100" height="40"/><rect fill="#ffb003" clip-path="url(#pounce-ld-clip)" x="10" y="80" width="100" height="30"/></svg>';
+
+  // 引擎元数据：buildUrl 为 null 表示走浏览器默认引擎（chrome.search.query）。
+  // iconSvg 有则用内联图标；否则 home 取该站 favicon（google）；都无则用放大镜（default）。
+  const SEARCH_ENGINES = {
+    default: { label: 'Default', buildUrl: null },
+    google:  { label: 'Google',  home: 'https://www.google.com', buildUrl: (q) => 'https://www.google.com/search?q=' + encodeURIComponent(q) },
+    bing:    { label: 'Bing',    iconSvg: ENGINE_ICON_BING,      buildUrl: (q) => 'https://www.bing.com/search?q=' + encodeURIComponent(q) },
+    github:  { label: 'GitHub',  iconSvg: ENGINE_ICON_GITHUB,    buildUrl: (q) => 'https://github.com/search?q=' + encodeURIComponent(q) },
+    linuxdo: { label: 'LinuxDo', iconSvg: ENGINE_ICON_LINUXDO,   buildUrl: (q) => 'https://linux.do/search?q=' + encodeURIComponent(q) }
+  };
+
+  // 空搜索框时轮播的功能提示(第 0 条为原始 placeholder)。
+  const PLACEHOLDER_KEYS = [
+    'overlay_searchPlaceholder',
+    'overlay_placeholderUrl',
+    'overlay_placeholderEngine',
+    'overlay_placeholderWebSearch',
+    'overlay_placeholderPinyin',
+    'overlay_placeholderCombo',
+    'overlay_placeholderCloseTab'
+  ];
+  const PLACEHOLDER_ROTATE_MS = 5000;
+  const PLACEHOLDER_FALLBACKS = {
+    overlay_searchPlaceholder: 'Search tabs, history, bookmarks, and top sites…',
+    overlay_placeholderUrl: 'Type a URL and press Enter to open it',
+    overlay_placeholderEngine: 'Click the left icon to switch search engine',
+    overlay_placeholderWebSearch: 'Select the “Search for…” result to search the web',
+    overlay_placeholderPinyin: 'Search Chinese tabs by pinyin, too',
+    overlay_placeholderCombo: 'Separate keywords with spaces to narrow results',
+    overlay_placeholderCloseTab: 'Press ✕ on a result to close that tab'
+  };
+
   class PounceSearchOverlay {
     constructor() {
       this.overlay = null;
       this.searchInput = null;
+      this._placeholderTimer = null;
+      this._placeholderIndex = 0;
       this.resultsContainer = null;
       this.resultsCounter = null;
       this.currentResults = [];
@@ -76,6 +122,9 @@
       this.searchPreferences = normalizeSearchPreferences({});
       this.quickPickHint = null;
       this.resultsLimitSelect = null;
+      this.enginePicker = null;
+      this.engineBtn = null;
+      this.engineMenu = null;
 
       // 版本标记 + destroy 状态，供扩展更新时旧实例替换逻辑使用
       this.version = POUNCE_OVERLAY_VERSION;
@@ -196,11 +245,9 @@
       const inputContainer = document.createElement('div');
       inputContainer.className = 'pounce-search-input-container';
       
-      // Create search icon — proper currentColor SVG
-      const searchIcon = document.createElement('div');
-      searchIcon.className = 'pounce-search-icon';
-      searchIcon.innerHTML = this.getSearchIconSvg();
-      
+      // 引擎选择器占据放大镜位置：按钮显示当前引擎图标,点击弹菜单切换。
+      this.enginePicker = this.createEnginePicker();
+
       // Create search input
       this.searchInput = document.createElement('input');
       this.searchInput.className = 'pounce-search-input';
@@ -293,16 +340,64 @@
       bottomContainer.appendChild(rightContainer);
       
       // Assemble the overlay with correct structure
-      inputContainer.appendChild(searchIcon);
+      inputContainer.appendChild(this.enginePicker);
       inputContainer.appendChild(this.searchInput);
       inputContainer.appendChild(closeIcon);
       container.appendChild(inputContainer);
       container.appendChild(this.resultsContainer);
       container.appendChild(bottomContainer);
       this.overlay.appendChild(container);
+      // 引擎菜单挂在 overlay 顶层(container 之后 → 绘制在其之上),
+      // 脱离 container 的 overflow:hidden;打开时按按钮位置绝对定位。
+      this.overlay.appendChild(this.engineMenu);
 
       this.shadowRoot.appendChild(this.overlay);
       (document.body || document.documentElement).appendChild(shadowHost);
+    }
+
+    applyPlaceholder() {
+      if (!this.searchInput) return;
+      const key = PLACEHOLDER_KEYS[this._placeholderIndex] || PLACEHOLDER_KEYS[0];
+      this.searchInput.placeholder = window.i18n ? window.i18n.t(key) : PLACEHOLDER_FALLBACKS[key];
+    }
+
+    startPlaceholderRotation() {
+      this.stopPlaceholderRotation();
+      this._placeholderIndex = 0;
+      this.applyPlaceholder();
+      // 尊重「减少动态」偏好:只显示第一条,不轮播。
+      const reduceMotion = typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduceMotion || PLACEHOLDER_KEYS.length < 2) return;
+      this._scheduleNextPlaceholder();
+    }
+
+    _scheduleNextPlaceholder() {
+      this._placeholderTimer = setTimeout(() => {
+        this._placeholderIndex = (this._placeholderIndex + 1) % PLACEHOLDER_KEYS.length;
+        this.applyPlaceholder();
+        this._scheduleNextPlaceholder();
+      }, PLACEHOLDER_ROTATE_MS);
+      // Node(测试)下不让这个自续期定时器阻塞进程退出;浏览器返回数字,无 unref,守卫后为空操作。
+      if (this._placeholderTimer && typeof this._placeholderTimer.unref === 'function') {
+        this._placeholderTimer.unref();
+      }
+    }
+
+    stopPlaceholderRotation() {
+      if (this._placeholderTimer) {
+        clearTimeout(this._placeholderTimer);
+        this._placeholderTimer = null;
+      }
+    }
+
+    // 有输入时停轮播(placeholder 不可见);清空后从头恢复。
+    syncPlaceholderRotation(value) {
+      if (String(value || '').trim()) {
+        this.stopPlaceholderRotation();
+      } else if (!this._placeholderTimer && this.isVisible) {
+        this.startPlaceholderRotation();
+      }
     }
 
     getResultsLimitLabel() {
@@ -336,6 +431,152 @@
       this.resultsLimitSelect.value = String(this.searchPreferences.resultsLimit);
     }
 
+    getSearchEngineLabel() {
+      return window.i18n ? window.i18n.t('overlay_searchEngine') : 'Search engine';
+    }
+
+    getEngineIconHtml(engineId) {
+      const engine = SEARCH_ENGINES[engineId] || SEARCH_ENGINES.default;
+      if (engine.iconSvg) {
+        return engine.iconSvg; // 内联图标,任意站点/无缓存都能显示
+      }
+      if (engine.home) {
+        // google：用浏览器 favicon 库(总是已缓存)；home 为常量,无注入风险。
+        const src = this.getFaviconUrl(engine.home);
+        return `<img class="pounce-engine-favicon" src="${src}" alt="" width="18" height="18">`;
+      }
+      return this.getSearchIconSvg(); // 'default' → 放大镜
+    }
+
+    // 放大镜位置的引擎选择器：按钮显示当前引擎图标,点击弹出图标菜单。
+    createEnginePicker() {
+      const wrap = document.createElement('div');
+      wrap.className = 'pounce-engine-picker';
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pounce-engine-btn';
+      btn.setAttribute('aria-haspopup', 'true');
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleEngineMenu();
+      });
+
+      const menu = document.createElement('div');
+      menu.className = 'pounce-engine-menu';
+      menu.hidden = true;
+      // 菜单内部点击不冒泡到 overlay(否则会触发收菜单/关浮层)。
+      menu.addEventListener('click', (e) => e.stopPropagation());
+
+      this.engineBtn = btn;
+      this.engineMenu = menu;
+      this._engineMenuBuilt = false;
+      // 菜单内容(含各引擎 favicon)首次打开时才构建,避免构造期做 favicon/URL 解析。
+      this.syncEngineButtonIcon();
+      this.syncEngineButtonLabel();
+
+      // 注意:菜单不放进 wrap,而是由 createOverlay 挂到 overlay 顶层,
+      // 以脱离 .pounce-search-container 的 overflow:hidden 裁剪(结果少时会切掉下方选项)。
+      wrap.appendChild(btn);
+      return wrap;
+    }
+
+    buildEngineMenu() {
+      if (!this.engineMenu) return;
+      this._engineMenuBuilt = true;
+      this.engineMenu.textContent = '';
+      const defaultLabel = window.i18n ? window.i18n.t('overlay_searchEngineDefault') : 'Default';
+      ALLOWED_SEARCH_ENGINES.forEach((id) => {
+        const opt = document.createElement('button');
+        opt.type = 'button';
+        opt.className = 'pounce-engine-option';
+        opt.dataset.engine = id;
+        const icon = document.createElement('span');
+        icon.className = 'pounce-engine-option-icon';
+        icon.innerHTML = this.getEngineIconHtml(id);
+        const label = document.createElement('span');
+        label.className = 'pounce-engine-option-label';
+        label.textContent = id === 'default' ? defaultLabel : (SEARCH_ENGINES[id]?.label || id);
+        opt.appendChild(icon);
+        opt.appendChild(label);
+        opt.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.selectEngine(id);
+        });
+        this.engineMenu.appendChild(opt);
+      });
+      this.markActiveEngineOption();
+    }
+
+    markActiveEngineOption() {
+      if (!this.engineMenu) return;
+      const current = this.searchPreferences.searchEngine;
+      this.engineMenu.querySelectorAll('.pounce-engine-option').forEach((el) => {
+        el.classList.toggle('is-active', el.dataset.engine === current);
+      });
+    }
+
+    syncEngineButtonIcon() {
+      if (!this.engineBtn) return;
+      this.engineBtn.innerHTML = this.getEngineIconHtml(this.searchPreferences.searchEngine);
+    }
+
+    syncEngineButtonLabel() {
+      if (!this.engineBtn) return;
+      const label = this.getSearchEngineLabel();
+      this.engineBtn.title = label;
+      this.engineBtn.setAttribute('aria-label', label);
+    }
+
+    toggleEngineMenu(force) {
+      if (!this.engineMenu || !this.engineBtn) return;
+      const show = typeof force === 'boolean' ? force : this.engineMenu.hidden;
+      if (show) {
+        if (!this._engineMenuBuilt) this.buildEngineMenu();
+        this.positionEngineMenu();
+      }
+      this.engineMenu.hidden = !show;
+      this.engineBtn.classList.toggle('is-open', show);
+    }
+
+    // 菜单在 overlay(视口全屏、position:fixed)坐标系里绝对定位到按钮正下方。
+    // ponytail: 只在打开时定位一次;开着时窗口 resize 极少见,resize 不重定位。
+    positionEngineMenu() {
+      if (!this.engineBtn || !this.engineMenu) return;
+      if (typeof this.engineBtn.getBoundingClientRect !== 'function') return;
+      const r = this.engineBtn.getBoundingClientRect();
+      this.engineMenu.style.left = `${Math.round(r.left)}px`;
+      this.engineMenu.style.top = `${Math.round(r.bottom + 6)}px`;
+    }
+
+    closeEngineMenu() {
+      if (this.engineMenu && !this.engineMenu.hidden) this.toggleEngineMenu(false);
+    }
+
+    isEngineMenuOpen() {
+      return !!this.engineMenu && !this.engineMenu.hidden;
+    }
+
+    async selectEngine(id) {
+      this.closeEngineMenu();
+      if (this.isVisible && this.searchInput) this.searchInput.focus();
+
+      const nextEngine = normalizeSearchEngine(id);
+      if (nextEngine === this.searchPreferences.searchEngine) return;
+
+      const previousPreferences = this.searchPreferences;
+      this.searchPreferences = { ...this.searchPreferences, searchEngine: nextEngine };
+      this.applySearchPreferences();
+
+      try {
+        await chrome.storage.sync.set({ searchEngine: nextEngine });
+      } catch (error) {
+        console.warn('Pounce: failed to save search engine preference', error);
+        this.searchPreferences = previousPreferences;
+        this.applySearchPreferences();
+      }
+    }
+
     isResultsLimitSelectEvent(event) {
       if (!this.resultsLimitSelect || !event) return false;
       if (event.target === this.resultsLimitSelect) return true;
@@ -359,6 +600,7 @@
       // Search input events
       this.searchInput.addEventListener('input', (e) => {
         this._resetMouseActivation();
+        this.syncPlaceholderRotation(e.target.value);
         this.handleSearch(e.target.value);
       });
 
@@ -393,6 +635,8 @@
       // 阻止点击冒泡到宿主页，同时点背板（overlay 本身）关闭弹窗
       this.overlay.addEventListener('click', (e) => {
         e.stopPropagation();
+        // 引擎按钮/选项自身会 stopPropagation；能冒泡到这里的点击都在选择器之外 → 收起菜单。
+        this.closeEngineMenu();
         if (e.target === this.overlay) this.hide();
       });
       
@@ -415,6 +659,12 @@
         if (e.key === 'Escape' && this.isVisible) {
           e.preventDefault();
           e.stopPropagation();
+          // 菜单开着时,Esc 先收菜单,不关整个浮层。
+          if (this.isEngineMenuOpen()) {
+            this.closeEngineMenu();
+            this.searchInput?.focus();
+            return;
+          }
           this.hide();
           return;
         }
@@ -523,7 +773,7 @@
     rerenderStaticOverlayText() {
       if (this.isDestroyed || !window.i18n) return;
       if (this.searchInput) {
-        this.searchInput.placeholder = window.i18n.t('overlay_searchPlaceholder');
+        this.applyPlaceholder(); // 用当前轮播中的那条,按新语言刷新
       }
       if (this.navigateHintEl) {
         this.navigateHintEl.textContent = ' ' + window.i18n.t('overlay_navigate');
@@ -538,6 +788,9 @@
         this.closeHintEl.textContent = ' ' + window.i18n.t('overlay_close');
       }
       this.syncResultsLimitSelectLabel();
+      this.syncEngineButtonLabel();
+      // 'default' 选项文案随语言变;仅在菜单已构建时重建(其余是专有名词)。
+      if (this._engineMenuBuilt) this.buildEngineMenu();
       // 重新渲染当前结果（含 sourceLabel 等动态文本）和计数
       if (this.currentResults && this.currentResults.length) {
         this.renderResults(this.searchInput ? this.searchInput.value : '');
@@ -625,6 +878,7 @@
       this._placeShadowHostForFocus();
       this.overlay.style.display = 'flex';
       this.searchInput.value = '';
+      this.startPlaceholderRotation();
       this._focusSearchInput();
       this._scheduleFocusRestore();
       this.selectedIndex = -1;
@@ -642,6 +896,10 @@
       if (!this.isVisible) return;
       this.isVisible = false; // 先置 false，阻止重复触发
       this._cancelFocusRestore();
+      this.stopPlaceholderRotation();
+      // 关引擎菜单：放在 bridgeTab 提前 return 之前,确保任何关闭路径
+      // (含点关闭图标,其 stopPropagation 绕过了 overlay 的收菜单逻辑)都复位。
+      this.closeEngineMenu();
 
       // 如果是跳板页且用户未选择结果，直接关闭该标签页。
       // 关键：用 setTimeout 把 tabs.remove 推出当前 keydown 事件栈。
@@ -681,6 +939,7 @@
         clearTimeout(this.historyFetchTimer);
         this.historyFetchTimer = null;
       }
+      this.stopPlaceholderRotation();
       this._cancelFocusRestore();
 
       if (this.docKeyDownHandler) {
@@ -732,6 +991,9 @@
       this.searchInput = null;
       this.resultsContainer = null;
       this.resultsLimitSelect = null;
+      this.enginePicker = null;
+      this.engineBtn = null;
+      this.engineMenu = null;
 
       if (this.isVisible) {
         document.body.style.overflow = '';
@@ -756,6 +1018,8 @@
       }
 
       this.syncResultsLimitSelectValue();
+      this.syncEngineButtonIcon();
+      this.markActiveEngineOption();
 
       if (this.overlay) {
         this.overlay.classList.toggle('pounce-quick-pick-disabled', !this.searchPreferences.quickPickEnabled);
@@ -865,8 +1129,23 @@
         this.currentResults = this.getFallbackResults(query);
       }
 
+      this.applyEngineToWebSearch();
       this.selectedIndex = -1;
       this.renderResults(query);
+    }
+
+    // web-search 兜底项由 search-ranking.js 统一生成(url: search:<query>);
+    // 这里按当前选中引擎改写它,让指定引擎走对应站点的搜索 URL。
+    applyEngineToWebSearch() {
+      const engine = SEARCH_ENGINES[this.searchPreferences.searchEngine] || SEARCH_ENGINES.default;
+      if (!engine.buildUrl) return; // 'default' → 保持 search: 前缀,走浏览器默认引擎
+      const item = (this.currentResults || []).find(
+        (r) => r && r.id === 'web-search' && typeof r.url === 'string' && r.url.startsWith('search:')
+      );
+      if (!item) return;
+      const query = item.url.slice('search:'.length);
+      item.engineUrl = engine.buildUrl(query);
+      item.displayUrl = engine.label;
     }
 
     cancelHistoryFetch() {
@@ -1505,12 +1784,21 @@
 
       try {
         if (item.type === 'search') {
-          const searchQuery = item.url.replace('search:', '');
-          await chrome.runtime.sendMessage({
-            action: 'performWebSearch',
-            query: searchQuery,
-            bridgeTabId: this.bridgeTabId
-          });
+          if (item.engineUrl) {
+            // 指定引擎：直接打开该引擎的搜索 URL（复用 openBookmark 的 bridge tab 逻辑）。
+            await chrome.runtime.sendMessage({
+              action: 'openBookmark',
+              url: item.engineUrl,
+              bridgeTabId: this.bridgeTabId
+            });
+          } else {
+            const searchQuery = item.url.replace('search:', '');
+            await chrome.runtime.sendMessage({
+              action: 'performWebSearch',
+              query: searchQuery,
+              bridgeTabId: this.bridgeTabId
+            });
+          }
         } else if (item.type === 'open') {
           await chrome.runtime.sendMessage({
             action: 'openBookmark',

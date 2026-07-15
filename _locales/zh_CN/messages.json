@@ -285,6 +285,30 @@
     "message": "搜索标签页、历史记录、书签和常用站点…",
     "description": "Overlay search input placeholder"
   },
+  "overlay_placeholderUrl": {
+    "message": "输入网址，回车直接打开",
+    "description": "Rotating overlay placeholder — direct URL open feature"
+  },
+  "overlay_placeholderEngine": {
+    "message": "点左边图标可切换搜索引擎",
+    "description": "Rotating overlay placeholder — click the left icon to switch engine"
+  },
+  "overlay_placeholderWebSearch": {
+    "message": "选中「搜索…」那条结果用网页搜索",
+    "description": "Rotating overlay placeholder — select the Search-for row to web-search"
+  },
+  "overlay_placeholderPinyin": {
+    "message": "拼音也能搜中文标签页",
+    "description": "Rotating overlay placeholder — pinyin matching feature"
+  },
+  "overlay_placeholderCombo": {
+    "message": "空格分隔多个关键词，交叉筛选结果",
+    "description": "Rotating overlay placeholder — space-separated multi-keyword filtering"
+  },
+  "overlay_placeholderCloseTab": {
+    "message": "在结果上按 ✕ 直接关掉标签页",
+    "description": "Rotating overlay placeholder — close tab from results"
+  },
   "overlay_navigate": {
     "message": "导航",
     "description": "Hint label for arrow keys in overlay"
@@ -332,6 +356,14 @@
   "overlay_searchDefault": {
     "message": "使用默认搜索引擎搜索",
     "description": "Display URL for the web search row in overlay"
+  },
+  "overlay_searchEngine": {
+    "message": "搜索引擎",
+    "description": "Label/title for the search engine picker in overlay"
+  },
+  "overlay_searchEngineDefault": {
+    "message": "默认",
+    "description": "Search engine picker option for the browser default engine"
   },
   "overlay_untitled": {
     "message": "无标题",

@@ -285,6 +285,30 @@
     "message": "Search tabs, history, bookmarks, and top sites...",
     "description": "Overlay search input placeholder"
   },
+  "overlay_placeholderUrl": {
+    "message": "Type a URL and press Enter to open it",
+    "description": "Rotating overlay placeholder — direct URL open feature"
+  },
+  "overlay_placeholderEngine": {
+    "message": "Click the left icon to switch search engine",
+    "description": "Rotating overlay placeholder — click the left icon to switch engine"
+  },
+  "overlay_placeholderWebSearch": {
+    "message": "Select the “Search for…” result to search the web",
+    "description": "Rotating overlay placeholder — select the Search-for row to web-search"
+  },
+  "overlay_placeholderPinyin": {
+    "message": "Search Chinese tabs by pinyin, too",
+    "description": "Rotating overlay placeholder — pinyin matching feature"
+  },
+  "overlay_placeholderCombo": {
+    "message": "Separate keywords with spaces to narrow results",
+    "description": "Rotating overlay placeholder — space-separated multi-keyword filtering"
+  },
+  "overlay_placeholderCloseTab": {
+    "message": "Press ✕ on a result to close that tab",
+    "description": "Rotating overlay placeholder — close tab from results"
+  },
   "overlay_navigate": {
     "message": "Navigate",
     "description": "Hint label for arrow keys in overlay"
@@ -332,6 +356,14 @@
   "overlay_searchDefault": {
     "message": "Search with default search engine",
     "description": "Display URL for the web search row in overlay"
+  },
+  "overlay_searchEngine": {
+    "message": "Search engine",
+    "description": "Label/title for the search engine picker in overlay"
+  },
+  "overlay_searchEngineDefault": {
+    "message": "Default",
+    "description": "Search engine picker option for the browser default engine"
   },
   "overlay_untitled": {
     "message": "Untitled",

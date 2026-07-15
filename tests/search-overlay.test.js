@@ -280,3 +280,75 @@ test('result icons fall back to letters when favicon loading fails', () => {
   img.onerror();
   assert.equal(icon.textContent, 'H');
 });
+
+test('web search fallback rewrites to the selected engine URL', () => {
+  const overlay = createOverlayHarness();
+  overlay.searchPreferences = preferences.normalizeSearchPreferences({ searchEngine: 'bing' });
+  overlay.currentResults = [{ id: 'web-search', type: 'search', url: 'search:hello world' }];
+
+  overlay.applyEngineToWebSearch();
+
+  assert.equal(overlay.currentResults[0].engineUrl, 'https://www.bing.com/search?q=hello%20world');
+  assert.equal(overlay.currentResults[0].displayUrl, 'Bing');
+});
+
+test('web search fallback keeps browser default (no engineUrl) for default engine', () => {
+  const overlay = createOverlayHarness();
+  overlay.searchPreferences = preferences.normalizeSearchPreferences({ searchEngine: 'default' });
+  overlay.currentResults = [{ id: 'web-search', type: 'search', url: 'search:hello' }];
+
+  overlay.applyEngineToWebSearch();
+
+  assert.equal(overlay.currentResults[0].engineUrl, undefined);
+  assert.equal(overlay.currentResults[0].url, 'search:hello');
+});
+
+test('hiding the overlay resets the engine menu so it does not reopen', () => {
+  const overlay = createOverlayHarness();
+  overlay.isVisible = true;
+  // 走 bridgeTab 提前 return 分支(不触到 blur),验证该路径也复位菜单。
+  overlay.bridgeTabId = 'bridge-1';
+  let closed = 0;
+  overlay.closeEngineMenu = () => { closed += 1; };
+
+  overlay.hide();
+
+  assert.equal(closed, 1);
+});
+
+test('engine menu is mounted on the overlay, not inside the clipped container', () => {
+  const overlay = createOverlayHarness();
+  // 菜单必须是 overlay 的直接子节点,才能脱离 .pounce-search-container 的 overflow:hidden。
+  assert.equal(overlay.engineMenu.parentNode, overlay.overlay);
+});
+
+test('opening the engine menu positions it below the button in viewport coords', () => {
+  const overlay = createOverlayHarness();
+  overlay.engineBtn.getBoundingClientRect = () => ({ left: 100, bottom: 60 });
+
+  overlay.positionEngineMenu();
+
+  assert.equal(overlay.engineMenu.style.left, '100px');
+  assert.equal(overlay.engineMenu.style.top, '66px');
+});
+
+test('placeholder cycles through feature hints (fallback text)', () => {
+  const overlay = createOverlayHarness();
+
+  overlay._placeholderIndex = 0;
+  overlay.applyPlaceholder();
+  assert.match(overlay.searchInput.placeholder, /tabs, history/);
+
+  overlay._placeholderIndex = 2;
+  overlay.applyPlaceholder();
+  assert.match(overlay.searchInput.placeholder, /search engine/i);
+});
+
+test('typing stops the placeholder rotation timer', () => {
+  const overlay = createOverlayHarness();
+  overlay._placeholderTimer = setTimeout(() => {}, 999999); // 假装正在轮播
+
+  overlay.syncPlaceholderRotation('hello');
+
+  assert.equal(overlay._placeholderTimer, null);
+});
