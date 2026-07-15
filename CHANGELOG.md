@@ -2,6 +2,10 @@
 
 🌐 **English** · [中文](CHANGELOG.zh-CN.md)
 
+### 1.6.2
+- New search-engine picker in the ⌘K overlay: click the icon on the left of the search box to choose which engine a web search uses — Default (your browser's), Google, Bing, GitHub or LinuxDo. Select the "Search for …" row and it searches with the engine you picked; your choice is remembered.
+- The search box now rotates a short tip every few seconds while it's empty, surfacing more of what Pounce can do — open a URL directly, search Chinese tabs by pinyin, filter with space-separated keywords, close a tab from the results — instead of a single fixed line.
+
 ### 1.6.1
 - Fix: in 1.6.0 the ⌘K search overlay wouldn't open on normal pages — the package was missing a script the overlay loads. Updating to 1.6.1 restores it.
 
