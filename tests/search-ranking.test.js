@@ -8,7 +8,7 @@ test('browser export attaches the helper on globalThis', () => {
   assert.equal(globalThis.PounceSearchUtils.getDisplayTitle, getDisplayTitle);
 });
 
-test('hostname prefix history matches outrank bookmarks and append search action', () => {
+test('hostname prefix history matches outrank bookmarks and prepend search action', () => {
   const results = rankResults([
     {
       type: 'bookmark',
@@ -33,9 +33,9 @@ test('hostname prefix history matches outrank bookmarks and append search action
     }
   ], 'goo', 10);
 
-  assert.equal(results[0].type, 'history');
-  assert.equal(results[0].displayUrl, 'google.com');
-  assert.equal(results.at(-1).type, 'search');
+  assert.equal(results[0].type, 'search');
+  assert.equal(results[1].type, 'history');
+  assert.equal(results[1].displayUrl, 'google.com');
 });
 
 test('enriched results expose source labels and icon fallbacks', () => {
@@ -220,7 +220,7 @@ test('non-empty queries rank stronger hostname matches ahead of weaker higher-pr
 
   assert.deepEqual(
     results.map((item) => item.type),
-    ['history', 'topSite', 'bookmark', 'tab', 'search']
+    ['search', 'history', 'topSite', 'bookmark', 'tab']
   );
 });
 
@@ -251,7 +251,7 @@ test('non-empty queries use source priority only to break ties between equally s
 
   assert.deepEqual(
     results.map((item) => item.type),
-    ['history', 'topSite', 'bookmark', 'search']
+    ['search', 'history', 'topSite', 'bookmark']
   );
 });
 
@@ -380,7 +380,7 @@ test('localhost and private ip inputs normalize to http', () => {
   assert.equal(ipResults[0].url, 'http://192.168.1.1');
 });
 
-test('strong real url matches stay ahead of synthetic open results', () => {
+test('complete-url quick-jump stays on top and web search returns to the bottom', () => {
   const results = rankResults([
     {
       type: 'history',
@@ -395,9 +395,9 @@ test('strong real url matches stay ahead of synthetic open results', () => {
 
   assert.deepEqual(
     results.map((item) => item.type),
-    ['history', 'open', 'search']
+    ['open', 'history', 'search']
   );
-  assert.equal(results[1].url, 'https://google.com');
+  assert.equal(results[0].url, 'https://google.com');
 });
 
 test('direct-url queries preserve path case when ranking real url matches', () => {
@@ -415,7 +415,7 @@ test('direct-url queries preserve path case when ranking real url matches', () =
 
   assert.deepEqual(
     results.map((item) => item.type),
-    ['history', 'open', 'search']
+    ['open', 'history', 'search']
   );
 });
 
@@ -441,11 +441,11 @@ test('www-prefixed direct queries normalize before ranking real url matches', ()
 
   assert.deepEqual(
     results.map((item) => item.type),
-    ['history', 'open', 'tab', 'search']
+    ['open', 'history', 'tab', 'search']
   );
 });
 
-test('host-and-port direct queries outrank title-only matches', () => {
+test('host-and-port direct queries put the open action on top', () => {
   const results = rankResults([
     {
       type: 'tab',
@@ -482,12 +482,12 @@ test('partial hostname input prefers real matches and does not force synthetic o
     }
   ], 'googl', 10);
 
-  assert.equal(results[0].type, 'history');
+  assert.equal(results[0].type, 'search');
   assert.equal(results.some((item) => item.type === 'open'), false);
-  assert.equal(results.at(-1).type, 'search');
+  assert.equal(results[1].type, 'history');
 });
 
-test('direct-open action outranks weaker title-only matches', () => {
+test('direct-open action sits on top, above title-only matches', () => {
   const results = rankResults([
     {
       type: 'tab',
@@ -685,8 +685,9 @@ test('multi-token query matches when all tokens appear (issue #5 example)', () =
     }
   ], 'aa cc', 10);
 
-  assert.equal(results[0].type, 'bookmark');
-  assert.equal(results[0].title, 'aaabbbccc');
+  const match = results.find((item) => item.type === 'bookmark');
+  assert.equal(match.type, 'bookmark');
+  assert.equal(match.title, 'aaabbbccc');
 });
 
 test('multi-token query is unordered — token order does not matter', () => {
@@ -702,8 +703,8 @@ test('multi-token query is unordered — token order does not matter', () => {
   const forward = rankResults(items, 'dev payment', 10);
   const reversed = rankResults(items, 'payment dev', 10);
 
-  assert.equal(forward[0].title, 'dev-payment-config');
-  assert.equal(reversed[0].title, 'dev-payment-config');
+  assert.equal(forward.find((item) => item.type === 'bookmark').title, 'dev-payment-config');
+  assert.equal(reversed.find((item) => item.type === 'bookmark').title, 'dev-payment-config');
 });
 
 test('multi-token query filters items where any token is missing', () => {

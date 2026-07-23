@@ -565,21 +565,6 @@
     });
   }
 
-  function insertResultByRank(results, candidate, query, tierCache) {
-    const rankedResults = Array.isArray(results) ? results.slice() : [];
-    let insertIndex = rankedResults.length;
-
-    for (let index = 0; index < rankedResults.length; index += 1) {
-      if (compareCandidates(candidate, rankedResults[index], query, tierCache) < 0) {
-        insertIndex = index;
-        break;
-      }
-    }
-
-    rankedResults.splice(insertIndex, 0, candidate);
-    return rankedResults;
-  }
-
   function getHighlightRangesForToken(text, token) {
     if (typeof text !== 'string' || text.length === 0) return [];
     if (typeof token !== 'string' || token.length === 0) return [];
@@ -671,12 +656,12 @@
 
     const trimmedQuery = String(query || '').trim();
     const openOption = getOpenOption(trimmedQuery);
-    const resultsWithActions = openOption
-      ? insertResultByRank(clipped, openOption, normalizedQuery, tierCache)
-      : [...clipped];
-
-    resultsWithActions.push(getSearchOption(trimmedQuery));
-    return resultsWithActions;
+    const searchOption = getSearchOption(trimmedQuery);
+    // For complete URLs, keep quick-jump first but leave web search at the
+    // bottom as a fallback. For other queries, web search stays on top.
+    return openOption
+      ? [openOption, ...clipped, searchOption]
+      : [searchOption, ...clipped];
   }
 
   const api = {

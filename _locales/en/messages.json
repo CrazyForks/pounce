@@ -557,6 +557,18 @@
       }
     }
   },
+  "overlay_searchForEngineQuery": {
+    "message": "$engine$ for \"$query$\"",
+    "description": "Synthetic web-search row title for a selected search engine",
+    "placeholders": {
+      "engine": {
+        "content": "$1"
+      },
+      "query": {
+        "content": "$2"
+      }
+    }
+  },
   "overlay_openUrl": {
     "message": "Open $url$",
     "description": "Direct-open row title in overlay",

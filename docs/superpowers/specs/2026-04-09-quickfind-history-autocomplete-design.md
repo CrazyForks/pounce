@@ -45,14 +45,16 @@ The current `includes()`-based search is replaced with layered matching:
 This applies to tabs, bookmarks, history, and top sites. Matching should normalize case and evaluate both raw URL and parsed hostname where parsing succeeds.
 
 ## Ranking Rules
-The overlay should behave like navigation-first autocomplete rather than document search.
+The overlay should provide an explicit search-first action while keeping the remaining suggestions navigation-aware.
 
-When a query is present, order by:
-1. Matching open tabs
-2. Strong matching history results
-3. Matching top sites
-4. Matching bookmarks
-5. Trailing `Search for "..."` action
+When a non-URL query is present, put the synthetic `Search for "..."` action first so Enter performs the explicit web-search action by default. Place matching sources after it in the existing navigation-aware order:
+1. Leading `Search for "..."` action
+2. Matching open tabs
+3. Strong matching history results
+4. Matching top sites
+5. Matching bookmarks
+
+For a complete URL-like query, put the synthetic `Open ...` action first, followed by matching real results, and keep the synthetic search action last.
 
 History ranking should prioritize:
 1. `typedCount`

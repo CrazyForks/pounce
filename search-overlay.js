@@ -435,6 +435,19 @@
       return window.i18n ? window.i18n.t('overlay_searchEngine') : 'Search engine';
     }
 
+    getSearchOptionTitle(query) {
+      const engineId = normalizeSearchEngine(this.searchPreferences.searchEngine);
+      const engine = SEARCH_ENGINES[engineId] || SEARCH_ENGINES.default;
+      if (engineId === 'default') {
+        return window.i18n
+          ? window.i18n.t('overlay_searchForQuery', [query])
+          : `Search for "${query}"`;
+      }
+      return window.i18n
+        ? window.i18n.t('overlay_searchForEngineQuery', [engine.label, query])
+        : `${engine.label} for "${query}"`;
+    }
+
     getEngineIconHtml(engineId) {
       const engine = SEARCH_ENGINES[engineId] || SEARCH_ENGINES.default;
       if (engine.iconSvg) {
@@ -793,6 +806,7 @@
       if (this._engineMenuBuilt) this.buildEngineMenu();
       // 重新渲染当前结果（含 sourceLabel 等动态文本）和计数
       if (this.currentResults && this.currentResults.length) {
+        this.applyEngineToWebSearch();
         this.renderResults(this.searchInput ? this.searchInput.value : '');
       } else {
         // 0 结果：刷新计数和（若已挂出）空态文案
@@ -1138,12 +1152,19 @@
     // 这里按当前选中引擎改写它,让指定引擎走对应站点的搜索 URL。
     applyEngineToWebSearch() {
       const engine = SEARCH_ENGINES[this.searchPreferences.searchEngine] || SEARCH_ENGINES.default;
-      if (!engine.buildUrl) return; // 'default' → 保持 search: 前缀,走浏览器默认引擎
       const item = (this.currentResults || []).find(
         (r) => r && r.id === 'web-search' && typeof r.url === 'string' && r.url.startsWith('search:')
       );
       if (!item) return;
       const query = item.url.slice('search:'.length);
+      item.displayTitle = this.getSearchOptionTitle(query);
+      if (!engine.buildUrl) {
+        delete item.engineUrl;
+        item.displayUrl = window.i18n
+          ? window.i18n.t('overlay_searchDefault')
+          : 'Search with default search engine';
+        return;
+      }
       item.engineUrl = engine.buildUrl(query);
       item.displayUrl = engine.label;
     }
@@ -1275,9 +1296,7 @@
       }
 
       const openResult = this.createOpenFallbackResult(trimmedQuery);
-      const searchTitle = window.i18n
-        ? window.i18n.t('overlay_searchForQuery', [trimmedQuery])
-        : `Search for "${trimmedQuery}"`;
+      const searchTitle = this.getSearchOptionTitle(trimmedQuery);
       const searchResult = {
         type: 'search',
         id: 'web-search',
@@ -1290,7 +1309,9 @@
         isSearchOption: true
       };
 
-      return openResult ? [...results, openResult, searchResult] : [...results, searchResult];
+      // Keep quick-jump first for complete URLs, with web search as the
+      // fallback at the bottom. For other queries, web search stays on top.
+      return openResult ? [openResult, ...results, searchResult] : [searchResult, ...results];
     }
 
     createOpenFallbackResult(query) {
@@ -1571,7 +1592,10 @@
       
       // Special handling for synthetic options.
       if (item.type === 'search') {
-        icon.innerHTML = this.getSearchIconSvg();
+        const engineId = normalizeSearchEngine(this.searchPreferences.searchEngine);
+        icon.innerHTML = this.getEngineIconHtml(engineId);
+        icon.dataset.engine = engineId;
+        if (engineId !== 'default') icon.classList.add('search-engine-icon');
         element.classList.add('search-option');
       } else if (item.type === 'open') {
         element.classList.add('open-option');

@@ -1004,6 +1004,11 @@
   stroke: currentColor;
 }
 
+.pounce-search-result.search-option .pounce-result-icon.search-engine-icon svg {
+  fill: currentColor;
+  stroke: none;
+}
+
 .pn-mouse-active .pounce-search-result.search-option:hover {
   background-color: var(--pn-accent);
   border-color: var(--pn-primary);

@@ -23,6 +23,25 @@ class FakeElement {
     this.attributes = {};
     this.eventListeners = {};
     this.className = '';
+    this.classList = {
+      add: (...tokens) => {
+        const current = new Set(this.className.split(/\s+/).filter(Boolean));
+        tokens.forEach((token) => current.add(token));
+        this.className = [...current].join(' ');
+      },
+      remove: (...tokens) => {
+        const remove = new Set(tokens);
+        this.className = this.className.split(/\s+/).filter((token) => token && !remove.has(token)).join(' ');
+      },
+      toggle: (token, force) => {
+        const has = this.className.split(/\s+/).includes(token);
+        const shouldHave = force === undefined ? !has : !!force;
+        if (shouldHave && !has) this.classList.add(token);
+        if (!shouldHave && has) this.classList.remove(token);
+        return shouldHave;
+      },
+      contains: (token) => this.className.split(/\s+/).includes(token)
+    };
     this.id = '';
     this.value = '';
     this.textContent = '';
@@ -198,6 +217,26 @@ test('overlay fallback results honor the configured results limit', () => {
   assert.equal(results.length, 20);
 });
 
+test('fallback actions keep complete-url search at the bottom', () => {
+  const overlay = createOverlayHarness();
+  overlay.searchPreferences = preferences.normalizeSearchPreferences({ resultsLimit: 20 });
+  overlay.allData = [{
+    type: 'history',
+    id: 'history:1',
+    title: 'Example',
+    url: 'https://example.com/',
+    typedCount: 1,
+    visitCount: 1,
+    lastVisitTime: 1
+  }];
+
+  const directResults = overlay.getFallbackResults('https://example.com');
+  assert.deepEqual(Array.from(directResults, (item) => item.type), ['open', 'history', 'search']);
+
+  const searchResults = overlay.getFallbackResults('example');
+  assert.deepEqual(Array.from(searchResults, (item) => item.type), ['search', 'history']);
+});
+
 test('Esc closes the overlay when the results limit select has focus', () => {
   const overlay = createOverlayHarness();
   let hideCalls = 0;
@@ -290,6 +329,26 @@ test('web search fallback rewrites to the selected engine URL', () => {
 
   assert.equal(overlay.currentResults[0].engineUrl, 'https://www.bing.com/search?q=hello%20world');
   assert.equal(overlay.currentResults[0].displayUrl, 'Bing');
+});
+
+test('web search title and result icon follow the selected engine', () => {
+  const overlay = createOverlayHarness();
+  overlay.searchPreferences = preferences.normalizeSearchPreferences({ searchEngine: 'github' });
+  overlay.currentResults = [{ id: 'web-search', type: 'search', url: 'search:hello' }];
+
+  overlay.applyEngineToWebSearch();
+
+  assert.equal(overlay.currentResults[0].displayTitle, 'GitHub for "hello"');
+  const result = overlay.createResultElement(overlay.currentResults[0], 0, 'hello');
+  const icon = result.querySelector('.pounce-result-icon');
+  assert.equal(icon.dataset.engine, 'github');
+  assert.equal(icon.classList.contains('search-engine-icon'), true);
+  assert.match(icon.innerHTML, /<svg/);
+
+  overlay.searchPreferences = preferences.normalizeSearchPreferences({ searchEngine: 'default' });
+  overlay.applyEngineToWebSearch();
+  assert.equal(overlay.currentResults[0].displayTitle, 'Search for "hello"');
+  assert.equal(overlay.currentResults[0].engineUrl, undefined);
 });
 
 test('web search fallback keeps browser default (no engineUrl) for default engine', () => {

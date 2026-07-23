@@ -47,17 +47,18 @@ The overlay should support three classes of results:
 Add a new synthetic result type, `open`, distinct from `search`.
 
 ## Ranking Rules
-For URL-like queries:
-1. Strong real URL/navigation matches
-2. Synthetic `Open ...` result
+For complete URL-like queries:
+1. Synthetic `Open ...` result
+2. Strong real URL/navigation matches
 3. Synthetic `Search for "..."` result
 
 Real results should still use the existing navigation-first ranking, so a strong hostname/history/top-site match can beat a weak tab title match.
 
 Only generate `Open ...` when the input is sufficiently URL-like. Do not create synthetic open actions for generic search phrases.
 
-For partial address inputs such as `googl`:
-- Prefer strong real autocomplete-style matches like `google.com`
+For partial address inputs such as `googl`, treat the input as a normal non-URL query:
+- Put the synthetic `Search for "googl"` action first
+- Keep strong real autocomplete-style matches such as `google.com` immediately after it
 - Do not force a synthetic `Open https://googl` candidate if the input is not confidently a navigable address
 
 ## Selection Behavior
@@ -69,7 +70,7 @@ Keep existing behavior for existing result types:
 Add:
 - `open`: open the normalized direct URL in a new tab
 
-When the top result is a strong real URL match or a synthetic `Open ...` result, Enter should open that destination directly rather than web-searching the raw input.
+When the top result is a synthetic `Open ...` result, Enter should open that destination directly. For ordinary and partial-address queries, the top synthetic `Search for ...` result should perform a web search unless the user moves selection to another result.
 
 ## Display
 The synthetic `open` result should render clearly, for example:
@@ -84,6 +85,6 @@ Manual verification should confirm:
 - `github.com/openai` opens directly
 - `localhost:3000` opens with `http://`
 - `192.168.1.1` opens with `http://`
-- `googl` prefers strong real autocomplete matches when available
+- `googl` shows the web-search action first, with strong real autocomplete matches immediately after it
 - `openai api` still behaves like a normal search query
 - Search fallback still works when the query is not URL-like

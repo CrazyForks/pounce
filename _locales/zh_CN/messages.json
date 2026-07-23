@@ -557,6 +557,18 @@
       }
     }
   },
+  "overlay_searchForEngineQuery": {
+    "message": "$engine$ 搜索「$query$」",
+    "description": "Synthetic web-search row title for a selected search engine",
+    "placeholders": {
+      "engine": {
+        "content": "$1"
+      },
+      "query": {
+        "content": "$2"
+      }
+    }
+  },
   "overlay_openUrl": {
     "message": "打开 $url$",
     "description": "Direct-open row title in overlay",
