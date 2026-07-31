@@ -309,6 +309,10 @@
     "message": "Press ✕ on a result to close that tab",
     "description": "Rotating overlay placeholder — close tab from results"
   },
+  "overlay_placeholderDuplicateTab": {
+    "message": "Press Cmd+E to duplicate the current tab",
+    "description": "Rotating overlay placeholder — duplicate the current tab"
+  },
   "overlay_navigate": {
     "message": "Navigate",
     "description": "Hint label for arrow keys in overlay"

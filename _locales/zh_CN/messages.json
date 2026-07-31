@@ -309,6 +309,10 @@
     "message": "在结果上按 ✕ 直接关掉标签页",
     "description": "Rotating overlay placeholder — close tab from results"
   },
+  "overlay_placeholderDuplicateTab": {
+    "message": "按 Cmd+E 复制当前标签页",
+    "description": "Rotating overlay placeholder — duplicate the current tab"
+  },
   "overlay_navigate": {
     "message": "导航",
     "description": "Hint label for arrow keys in overlay"

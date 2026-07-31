@@ -401,6 +401,10 @@ test('placeholder cycles through feature hints (fallback text)', () => {
   overlay._placeholderIndex = 2;
   overlay.applyPlaceholder();
   assert.match(overlay.searchInput.placeholder, /search engine/i);
+
+  overlay._placeholderIndex = 7;
+  overlay.applyPlaceholder();
+  assert.match(overlay.searchInput.placeholder, /Cmd\+E.*duplicate the current tab/i);
 });
 
 test('typing stops the placeholder rotation timer', () => {

@@ -87,7 +87,8 @@
     'overlay_placeholderWebSearch',
     'overlay_placeholderPinyin',
     'overlay_placeholderCombo',
-    'overlay_placeholderCloseTab'
+    'overlay_placeholderCloseTab',
+    'overlay_placeholderDuplicateTab'
   ];
   const PLACEHOLDER_ROTATE_MS = 5000;
   const PLACEHOLDER_FALLBACKS = {
@@ -97,7 +98,8 @@
     overlay_placeholderWebSearch: 'Select the “Search for…” result to search the web',
     overlay_placeholderPinyin: 'Search Chinese tabs by pinyin, too',
     overlay_placeholderCombo: 'Separate keywords with spaces to narrow results',
-    overlay_placeholderCloseTab: 'Press ✕ on a result to close that tab'
+    overlay_placeholderCloseTab: 'Press ✕ on a result to close that tab',
+    overlay_placeholderDuplicateTab: 'Press Cmd+E to duplicate the current tab'
   };
 
   class PounceSearchOverlay {
