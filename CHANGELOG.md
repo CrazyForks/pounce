@@ -2,6 +2,10 @@
 
 🌐 **English** · [中文](CHANGELOG.zh-CN.md)
 
+### 1.6.3
+- Search actions in the ⌘K overlay now stay in predictable positions: web search appears first for ordinary queries, while complete URLs put direct open first and keep web search as the bottom fallback. The search row also shows the selected engine's name and icon.
+- The rotating empty-search tips now surface the ⌘E shortcut for duplicating the current tab.
+
 ### 1.6.2
 - New search-engine picker in the ⌘K overlay: click the icon on the left of the search box to choose which engine a web search uses — Default (your browser's), Google, Bing, GitHub or LinuxDo. Select the "Search for …" row and it searches with the engine you picked; your choice is remembered.
 - The search box now rotates a short tip every few seconds while it's empty, surfacing more of what Pounce can do — open a URL directly, search Chinese tabs by pinyin, filter with space-separated keywords, close a tab from the results — instead of a single fixed line.
